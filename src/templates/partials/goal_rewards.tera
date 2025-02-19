@@ -1,0 +1,10 @@
+<div id="goal-rewards">
+  <h3>Goal-Based Rewards</h3>
+  <div class="reward-widget">
+    <p>Your reward for completing this goal: <strong>{{ reward.name }}</strong></p>
+    <p>Progress: <span id="reward-progress">{{ reward.progress }}%</span></p>
+    <div class="progress-bar">
+      <div class="progress" style="width: {{ reward.progress }}%;"></div>
+    </div>
+  </div>
+</div>

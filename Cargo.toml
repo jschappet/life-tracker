@@ -1,0 +1,25 @@
+[package]
+name = "life-tracker-actix"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "life_tracker"
+path = "src/lib.rs"
+
+[[bin]]
+name = "life-tracker"
+path = "src/main.rs"
+
+[dependencies]
+actix-web = { version = "4.9.0", features = ["secure-cookies", "cookies"] }
+chrono = { version = "0.4.39", features = ["serde"] }
+diesel = { version = "2.2.7", features = ["sqlite", "chrono", "r2d2"] }
+dotenvy = "0.15.7"
+serde = { version = "1.0.217", features = ["derive"] }
+actix-files = "0.6"
+env_logger = "0.11.6"
+log = "0.4.25"
+actix-service = "2.0.2"
+futures = "0.3.31"
+actix-rt = "2.10.0"

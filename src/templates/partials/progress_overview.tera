@@ -1,0 +1,12 @@
+<div id="progress-overview">
+  <h3>Current Progress</h3>
+  {% for goal in goals %}
+    <div class="goal-progress">
+      <h4>{{ goal.name }}</h4>
+      <div class="progress-bar">
+        <div class="progress" style="width: {{ goal.progress }}%;"></div>
+      </div>
+      <p>{{ goal.progress }}% complete</p>
+    </div>
+  {% endfor %}
+</div>

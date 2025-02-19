@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Life Tracker Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome, {{ user_name }}</h1>
+    </header>
+    
+    <main>
+        <p>Testing partial inclusion</p>
+{% include 'partials/daily_tasks' %}
+{% include 'partials/progress_overview' %}
+{% include 'partials/goal_rewards' %}
+
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Life Tracker</p>
+    </footer>
+</body>
+<script src="/static/js/script.js"></script>
+</html>
