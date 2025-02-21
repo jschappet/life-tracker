@@ -4,7 +4,7 @@ use crate::state::AppState;
 use crate::models::{DailyTodo, NewDailyTodo};
 
 #[post("/api/daily_todo")]
-pub async fn create_daily_todo_api(
+pub async fn create_daily_todo_api<'hb>(
     data: web::Data<AppState>,
     new_daily_todo: web::Json<NewDailyTodo>,
 ) -> impl Responder {
