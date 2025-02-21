@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life Tracker</title>
     <link rel="stylesheet" href="/s/css/style.css" type="text/css">
+    <script src="https://unpkg.com/htmx.org@1.5.0"></script>
+
 </head>
 <body>
     <h1>Welcome to Life Tracker</h1>
+    <h2>Users</h2>
+    <div id="user-grid" hx-get="/users" hx-trigger="load"></div>
+    <h2>Projects</h2>
+    <div id="project-grid" hx-get="/projects" hx-trigger="load"></div>
+    <h2>Goals</h2>
+    <div id="goal-grid" hx-get="/goals/1" hx-trigger="load"></div>
+    <h2>Daily Todo</h2>
+    <div id="daily-todo-grid" hx-get="/daily_todo/1" hx-trigger="load"></div>
     <h2>Current Features:</h2>
     <ul>
         <li>Track daily habits</li>

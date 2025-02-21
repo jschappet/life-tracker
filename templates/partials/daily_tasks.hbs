@@ -1,0 +1,11 @@
+<div id="daily-tasks">
+  <h3>Today's To-Do List</h3>
+  <ul>
+    {{#each tasks}}
+      <li>
+        <input type="checkbox" hx-get="/api/tasks/complete/{{this.id}}" hx-target="#task-{{this.id}}" id="task-{{this.id}}">
+        <label for="task-{{this.id}}">{{this.title}}</label>
+      </li>
+    {{/each}}
+  </ul>
+</div>

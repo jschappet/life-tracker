@@ -10,18 +10,21 @@ use std::env;
 use dotenvy;
 use actix_files as fs;
 use env_logger::Env;
+use handlebars::{DirectorySourceOptions, Handlebars};
+use std::sync::Arc;
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Enable logging system-wide
     env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
-    log::info!("Logging initialized.");
+    log::debug!("Logging initialized.");
 
     dotenvy::dotenv().ok();
-    log::info!("Environment variables loaded.");
+    log::debug!("Environment variables loaded.");
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    log::info!("Database URL: {}", database_url);
+    log::debug!("Database URL: {}", database_url);
 
     let manager = ConnectionManager::<SqliteConnection>::new(database_url);
     let pool: r2d2::Pool<ConnectionManager<SqliteConnection>> = r2d2::Pool::builder()
@@ -29,12 +32,30 @@ async fn main() -> std::io::Result<()> {
         .expect("Failed to create pool.");
     log::info!("Database connection pool created.");
 
+    let dso = DirectorySourceOptions::default();
+
+    let mut handlebars = Handlebars::new();
+    handlebars
+        .register_templates_directory("./templates/", dso)
+        .expect("Failed to register templates directory");
+
+        log::debug!("Hb: {}",handlebars.get_templates().keys().count());
+            
+    // Log all registered templates
+    for template_name in handlebars.get_templates().keys() {
+        log::debug!("Registered template: {}", template_name);
+    }
+    let handlebars  = Arc::new(handlebars);
+
     let app_state = AppState {
         db_pool: pool.clone(),
         omdb_api_key: "foo".to_string(),
+        hb: handlebars.clone(),
     };
+
     log::info!("App state initialized.");
 
+   
     HttpServer::new(move || {
         App::new()
             .wrap(mw::Logger::default()) 

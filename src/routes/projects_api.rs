@@ -4,8 +4,8 @@ use crate::state::AppState;
 use crate::models::{Project, NewProject};
 
 #[post("/api/projects")]
-pub async fn create_project_api(
-    data: web::Data<AppState>,
+pub async fn create_project_api<'hb>(
+    data: web::Data<AppState<'hb>>,
     new_project: web::Json<NewProject>,
 ) -> impl Responder {
     let pool = &data.db_pool;
@@ -22,7 +22,7 @@ pub async fn create_project_api(
 }
 
 #[get("/api/projects")]
-pub async fn get_projects_api(data: web::Data<AppState>) -> impl Responder {
+pub async fn get_projects_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_projects(conn) {
         Ok(projects) => HttpResponse::Ok().json(projects),
@@ -31,8 +31,8 @@ pub async fn get_projects_api(data: web::Data<AppState>) -> impl Responder {
 }
 
 #[put("/api/project/{project_id}")]
-pub async fn update_project_api(
-    data: web::Data<AppState>,
+pub async fn update_project_api<'hb>(
+    data: web::Data<AppState<'hb>>,
     project_id: web::Path<i32>,
     updated_project: web::Json<Project>,
 ) -> impl Responder {
@@ -49,7 +49,7 @@ pub async fn update_project_api(
 }
 
 #[delete("/api/project/{project_id}")]
-pub async fn delete_project_api(data: web::Data<AppState>, project_id: web::Path<i32>) -> impl Responder {
+pub async fn delete_project_api<'hb>(data: web::Data<AppState<'hb>>, project_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let id = project_id.into_inner();
     match delete_project(conn, id) {
@@ -58,9 +58,29 @@ pub async fn delete_project_api(data: web::Data<AppState>, project_id: web::Path
     }
 }
 
+#[get("/projects")]
+pub async fn get_projects_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
+    let conn = &mut data.db_pool.get().expect("Database connection failed");
+    match get_projects(conn) {
+        Ok(projects) => {
+            let html = format!(
+                r#"{}"#,
+                projects
+                    .into_iter()
+                    .map(|project| format!("<li>{}: {}</li>", project.title, project.description.unwrap_or("None".to_string())))
+                    .collect::<Vec<String>>()
+                    .join("")
+            );
+            HttpResponse::Ok().content_type("text/html").body(html)
+        }
+        Err(_) => HttpResponse::InternalServerError().body("Failed to retrieve projects"),
+    }
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(create_project_api)
        .service(get_projects_api)
        .service(update_project_api)
-       .service(delete_project_api);
+       .service(delete_project_api)
+       .service(get_projects_page);
 }

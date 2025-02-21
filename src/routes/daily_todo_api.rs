@@ -5,7 +5,7 @@ use crate::models::{DailyTodo, NewDailyTodo};
 
 #[post("/api/daily_todo")]
 pub async fn create_daily_todo_api<'hb>(
-    data: web::Data<AppState>,
+    data: web::Data<AppState<'hb>>,
     new_daily_todo: web::Json<NewDailyTodo>,
 ) -> impl Responder {
     let pool = &data.db_pool;
@@ -23,7 +23,7 @@ pub async fn create_daily_todo_api<'hb>(
 }
 
 #[get("/api/daily_todo/{user_id}")]
-pub async fn get_daily_todo_api(data: web::Data<AppState>, user_id: web::Path<i32>) -> impl Responder {
+pub async fn get_daily_todo_api<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     log::info!("Getting daily todos for user {:?}", user_id);
     match get_daily_todos_by_user(conn, user_id.into_inner()) {
@@ -33,8 +33,8 @@ pub async fn get_daily_todo_api(data: web::Data<AppState>, user_id: web::Path<i3
 }
 
 #[put("/api/daily_todo/{daily_todo_id}")]
-pub async fn update_daily_todo_api(
-    data: web::Data<AppState>,
+pub async fn update_daily_todo_api<'hb>(
+    data: web::Data<AppState<'hb>>,
     daily_todo_id: web::Path<i32>,
     updated_daily_todo: web::Json<DailyTodo>,
 ) -> impl Responder {
@@ -50,7 +50,7 @@ pub async fn update_daily_todo_api(
 }
 
 #[delete("/api/daily_todo/{daily_todo_id}")]
-pub async fn delete_daily_todo_api(data: web::Data<AppState>, daily_todo_id: web::Path<i32>) -> impl Responder {
+pub async fn delete_daily_todo_api<'hb>(data: web::Data<AppState<'hb>>, daily_todo_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let id = daily_todo_id.into_inner();
     match delete_daily_todo(conn, id) {
@@ -59,9 +59,31 @@ pub async fn delete_daily_todo_api(data: web::Data<AppState>, daily_todo_id: web
     }
 }
 
+
+#[get("/daily_todos/{user_id}")]
+pub async fn get_daily_todos_page<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Path<i32>) -> impl Responder {
+    let conn = &mut data.db_pool.get().expect("Database connection failed");
+    match get_daily_todos_by_user(conn, user_id.into_inner()) {
+        Ok(daily_todos) => {
+            // TODO Grab the associated task for this daily_toddo
+            let html = format!(
+                r#"{}"#,
+                daily_todos
+                    .into_iter()
+                    .map(|todo| format!("<li>{}</li>", todo.date))
+                    .collect::<Vec<String>>()
+                    .join("")
+            );    
+            HttpResponse::Ok().content_type("text/html").body(html)
+        }
+        Err(_) => HttpResponse::InternalServerError().body("Failed to retrieve daily todos"),
+    }
+}
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(create_daily_todo_api)
        .service(get_daily_todo_api)
        .service(update_daily_todo_api)
-       .service(delete_daily_todo_api);
+       .service(delete_daily_todo_api)
+       .service(get_daily_todos_page)
+       ;
 }

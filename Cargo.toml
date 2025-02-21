@@ -1,5 +1,5 @@
 [package]
-name = "life-tracker-actix"
+name = "life-tracker"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,7 @@ name = "life_tracker"
 path = "src/lib.rs"
 
 [[bin]]
-name = "life-tracker"
+name = "lifeTacker"
 path = "src/main.rs"
 
 [dependencies]
@@ -23,3 +23,6 @@ log = "0.4.25"
 actix-service = "2.0.2"
 futures = "0.3.31"
 actix-rt = "2.10.0"
+handlebars = { version = "6.3.1", features = ["dir_source"] }
+serde_json = "1.0.138"
+

@@ -1,0 +1,12 @@
+<div id="progress-overview">
+  <h3>Current Progress</h3>
+  {{#each goals}}
+    <div class="goal-progress">
+      <h4>{{this.name}}</h4>
+      <div class="progress-bar">
+        <div class="progress" style="width: {{this.progress}}%;"></div>
+      </div>
+      <p>{{this.progress}}% complete</p>
+    </div>
+  {{/each}}
+</div>
