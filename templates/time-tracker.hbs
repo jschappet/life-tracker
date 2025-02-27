@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Life Tracker - Time Tracker</title>
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
-  <link href="/s/css/output.css" rel="stylesheet">
+  <link href="/tracker/s/css/output.css" rel="stylesheet">
 
 </head>
 <body >
@@ -20,7 +20,7 @@
           name="taskInput"
           class="w-full p-2 border rounded mt-1 bg-sage-light text-sage-dark" 
           placeholder="Type your task..."
-          hx-get="./autocomplete"
+          hx-get="/tracker/autocomplete"
           hx-trigger="keyup changed delay:500ms"
           hx-target="#suggestions"
           hx-swap="innerHTML"
@@ -39,7 +39,7 @@
           class="w-full bg-sage-light text-white px-4 py-2 rounded-lg" 
           data-state="stopped" 
           onclick="toggleTask(this)"
-          hx-post="./start-task"
+          hx-post="/tracker/start-task"
           hx-trigger="click"
         >
           Start Task
@@ -71,7 +71,7 @@
       {{ /each}}
     </div>
   </div>
-    <script src="/s/js/script.js"></script>
+    <script src="/tracker/s/js/script.js"></script>
 
 </body>
 </html>

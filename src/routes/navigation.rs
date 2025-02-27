@@ -96,7 +96,7 @@ struct LoginResponse {
 }
 
 // Convert to template
-#[get("login")]
+#[get("/login")]
 async fn login_form(data: web::Data<AppState<'_>>) -> HttpResponse {
     let hb = &data.hb;
     let data = json!({});

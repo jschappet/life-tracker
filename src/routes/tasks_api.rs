@@ -20,7 +20,7 @@ struct SubmitTaskData {
 #[derive(Deserialize, Debug)]
 struct UpdateTask {
     #[serde(rename = "taskInput")]
-    title: String,
+    title: Option<String>,
     task_id: i32,
     notes: Option<String>,
     status: Option<String>,

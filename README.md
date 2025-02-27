@@ -12,15 +12,17 @@ Life Tracker is a web application designed to help you manage and track your tas
 ## Technologies Used
 
 - **Frontend**: HTML, CSS (TailwindCSS), JavaScript
-- **Backend**: Node.js, Express
-- **Database**: MongoDB
+- **Backend**: Rust, Actix
+- **Database**: Sqlite
 - **API**: Unsplash API for background images
 
 ## Installation
 
+### Node.js and Express
+
 1. Clone the repository:
    ```bash
-   git clone https://github.com/schappet/life-tracker.git
+   git clone https://github.com/jschappet/life-tracker.git
    cd life-tracker
    ```
 
@@ -29,18 +31,17 @@ Life Tracker is a web application designed to help you manage and track your tas
    npm install
    ```
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory and add the following:
-   ```env
-   UNSPLASH_ACCESS_KEY=your_unsplash_access_key
-   ```
 
-4. Start the application:
+### Rust and Actix
+
+1. Ensure you have Rust installed. If not, install it from [rust-lang.org](https://www.rust-lang.org/).
+
+3. Build and run the Actix server:
    ```bash
-   npm start
+   cargo run
    ```
 
-5. Open your browser and navigate to `http://localhost:3000`.
+4. The Actix server will start on `http://localhost:8080`.
 
 ## Usage
 
@@ -60,6 +61,9 @@ life-tracker/
 │   │   └── script.js
 ├── templates/
 │   └── time-tracker.hbs
+├── src/
+│   └── main.rs
+│   Cargo.toml
 ├── .env
 ├── package.json
 ├── README.md
@@ -78,3 +82,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 - [Unsplash](https://unsplash.com) for providing the background images.
 - [TailwindCSS](https://tailwindcss.com) for the CSS framework.
+
+

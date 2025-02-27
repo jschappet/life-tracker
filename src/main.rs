@@ -102,8 +102,10 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("App state initialized.");
     //let basic_auth = HttpAuthentication::basic(basic_validator);
-    let secret_key = actix_web::cookie::Key::from("SECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDF".as_bytes());
+    let secret_key = actix_web::cookie::Key::from("SECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDFSECRETKAJSDKAJSDF".as_bytes());
 
+    let host = env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
 
     HttpServer::new(move || {
         let bearer_auth = HttpAuthentication::bearer(validator);
@@ -121,22 +123,22 @@ async fn main() -> std::io::Result<()> {
             //.wrap(middleware::log_routes::LogRoutes) // Add the custom middleware
             .app_data(web::Data::new(app_state.clone())) // Provide the app state
             .service(
-                web::scope("/app")
+                web::scope("/tracker/app")
                 //.wrap(basic_auth)
                 .configure(routes::config_navigation)) 
-            .service(fs::Files::new("/s", "static")
+            .service(fs::Files::new("/tracker/s", "static")
                 .index_file("index.html")) // Serve static files from /static
-            .service(web::scope("/api")
+            .service(web::scope("/tracker/api")
                 .wrap(bearer_auth)
                     .configure(routes::config_api) 
                 )
-                //Create Route to redirect / to /app/login
-            .service(web::scope("/").route("", web::get().to(|| async { HttpResponse::Found().header("LOCATION", "/app/login").finish() })))
+                //Create Route to redirect /tracker to /tracker/app/login
+            .service(web::scope("/tracker").route("", web::get().to(|| async { HttpResponse::Found().header("LOCATION", "/tracker/app/login").finish() })))
            
 
 
     })
-    .bind(("0.0.0.0", 8080))?
+    .bind(format!("{}:{}", host, port))?
     .run()
     .await
 }

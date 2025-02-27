@@ -9,7 +9,7 @@ function setToken(token) {
 async function callApi(endpoint) {
   const token = localStorage.getItem('auth_token');
   try {
-    const response = await fetch(`/api/page/${endpoint}`, {
+    const response = await fetch(`/tracker/api/page/${endpoint}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -43,7 +43,7 @@ setToken(getCookie('jwt_token'));
 // Function to get a new photo from Unsplash in a nature theme and set it as the background image
 async function setBackgroundImage() {
   try {
-    const response = await fetch('https://api.unsplash.com/photos/random?query=nature&client_id=VYaoddg73fuC3qzqxcHQFZeynSQLPpuPviwSk35rxsY'); // Replace with your actual Unsplash API access key
+    const response = await fetch(`https://api.unsplash.com/photos/random?query=nature&client_id=VYaoddg73fuC3qzqxcHQFZeynSQLPpuPviwSk35rxsY`);
     const data = await response.json();
     if (data && data.urls && data.urls.full) {
       document.body.style.backgroundImage = `url(${data.urls.full})`;
@@ -124,7 +124,7 @@ function markTaskStopped(button, task_id) {
     event.preventDefault();
     const token = localStorage.getItem('auth_token');
 
-    fetch('/api/tt-update-task', {
+    fetch('/tracker/api/tt-update-task', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ function submitTask(event) {
   const taskInput = document.getElementById('taskInput');
   const token = localStorage.getItem('auth_token');
 
-  fetch('/api/submit-task', {
+  fetch('/tracker/api/submit-task', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
