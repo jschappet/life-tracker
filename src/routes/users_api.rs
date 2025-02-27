@@ -3,7 +3,7 @@ use crate::crud::{create_user, get_users, get_user, update_user, delete_user};
 use crate::state::AppState;
 use crate::models::{User, NewUser};
 
-#[post("/api/users")]
+#[post("/users")]
 pub async fn create_user_api<'hb>(
     data: web::Data<AppState<'hb>>,
     new_user: web::Json<NewUser>,
@@ -22,7 +22,7 @@ pub async fn create_user_api<'hb>(
 }
 
 
-#[get("/users")]
+#[get("/page/users")]
 pub async fn get_users_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_users(conn) {
@@ -42,7 +42,7 @@ pub async fn get_users_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Respond
     }
 }
 
-#[get("/api/users")]
+#[get("/users")]
 pub async fn get_users_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_users(conn) {
@@ -51,7 +51,7 @@ pub async fn get_users_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Responde
     }
 }
 
-#[get("/api/user/{user_id}")]
+#[get("/user/{user_id}")]
 pub async fn get_user_api<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_user(conn, user_id.into_inner()) {
@@ -60,7 +60,7 @@ pub async fn get_user_api<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Pat
     }
 }
 
-#[put("/api/user/{user_id}")]
+#[put("/user/{user_id}")]
 pub async fn update_user_api<'hb>(
     data: web::Data<AppState<'hb>>,
     user_id: web::Path<i32>,
@@ -78,7 +78,7 @@ pub async fn update_user_api<'hb>(
     }
 }
 
-#[delete("/api/user/{user_id}")]
+#[delete("/user/{user_id}")]
 pub async fn delete_user_api<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let id = user_id.into_inner();

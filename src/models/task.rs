@@ -22,4 +22,6 @@ pub struct NewTask {
     pub title: String,
     pub description: Option<String>,
     pub due_date: Option<NaiveDate>,
+    pub user_id: i32,
+    pub project_id: Option<i32>,
 }

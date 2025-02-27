@@ -3,7 +3,7 @@ use crate::crud::{create_project, get_projects, update_project, delete_project};
 use crate::state::AppState;
 use crate::models::{Project, NewProject};
 
-#[post("/api/projects")]
+#[post("/projects")]
 pub async fn create_project_api<'hb>(
     data: web::Data<AppState<'hb>>,
     new_project: web::Json<NewProject>,
@@ -21,7 +21,7 @@ pub async fn create_project_api<'hb>(
     }
 }
 
-#[get("/api/projects")]
+#[get("/projects")]
 pub async fn get_projects_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_projects(conn) {
@@ -30,7 +30,7 @@ pub async fn get_projects_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Respo
     }
 }
 
-#[put("/api/project/{project_id}")]
+#[put("/project/{project_id}")]
 pub async fn update_project_api<'hb>(
     data: web::Data<AppState<'hb>>,
     project_id: web::Path<i32>,
@@ -48,7 +48,7 @@ pub async fn update_project_api<'hb>(
     }
 }
 
-#[delete("/api/project/{project_id}")]
+#[delete("/project/{project_id}")]
 pub async fn delete_project_api<'hb>(data: web::Data<AppState<'hb>>, project_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let id = project_id.into_inner();
@@ -58,7 +58,7 @@ pub async fn delete_project_api<'hb>(data: web::Data<AppState<'hb>>, project_id:
     }
 }
 
-#[get("/projects")]
+#[get("/page/projects")]
 pub async fn get_projects_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_projects(conn) {

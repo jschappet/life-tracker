@@ -8,12 +8,15 @@ pub mod users_api;
 
 use actix_web::web;
 
-pub fn config(cfg: &mut web::ServiceConfig) {
+pub fn config_api(cfg: &mut web::ServiceConfig) {
     cfg.configure(tasks_api::config)
-        .configure(navigation::config)
         .configure(goals_api::config)
         .configure(projects_api::config)
         .configure(users_api::config)
         .configure(rewards_api::config)
         .configure(daily_todo_api::config);
+}
+
+pub fn config_navigation(cfg: &mut web::ServiceConfig) {
+    cfg.configure(navigation::config);
 }

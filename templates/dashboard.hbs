@@ -1,16 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasks Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life Tracker Dashboard</title>
+  <link href="/s/css/output.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Tasks Dashboard</h1>
-    <ul>
-        {{#each tasks}}
-            <li>{{this.title}} - {{this.description}} - {{this.due_date}}</li>
-        {{/each}}
-    </ul>
+<body class="bg-page">
+  <div class="dashboard-container">
+    <nav class="dashboard-nav">
+      <span class="dashboard-title">Life Tracker</span>
+      <ul class="nav-list">
+        <li><a href="./time-tracker" class="nav-item">Time Traker</a></li>
+        <li><a href="#daily-todos-list" class="nav-item">Daily Todos</a></li>
+        <li><a href="#projects-list" class="nav-item">Projects</a></li>
+        <li><a href="#goals-list" class="nav-item">Goals</a></li>
+        <li><a href="#rewards-list" class="nav-item">Rewards</a></li>
+        <li><a href="/logout" class="nav-logout">Log Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="dashboard-grid">
+      <!-- Tasks Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">Tasks</h2>
+        <div id="tasks-list">
+          {{#each tasks}}
+            <div class="task-item">
+              <h3 class="task-title">{{this.title}}</h3>
+              <p class="task-description">{{this.description}}</p>
+              <p class="task-due-date">Due: {{this.due_date}}</p>
+            </div>
+          {{/each}}
+        </div>
+        <button class="add-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Daily Todos Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">Daily Todos</h2>
+        <div id="daily-todos-list">
+          <!-- Daily todos will load here -->
+        </div>
+        <button class="add-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Projects Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">Projects</h2>
+        <div id="projects-list">
+          <!-- Projects will load here -->
+        </div>
+        <button class="add-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Goals Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">Goals</h2>
+        <div id="goals-list">
+          <!-- Goals will load here -->
+        </div>
+        <button class="add-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Rewards Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">Rewards</h2>
+        <div id="rewards-list">
+          <!-- Rewards will load here -->
+        </div>
+        <button class="add-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+      <script src="/s/js/script.js"></script>
+
 </body>
 </html>
+

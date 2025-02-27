@@ -1,6 +1,3 @@
-
-
-
 pub mod task;
 pub mod daily_todos;
 pub mod project;
@@ -9,8 +6,12 @@ pub mod goals;
 pub mod reward;
 
 
-pub use task::{create_task, get_tasks, update_task, delete_task};
-pub use user::{create_user, get_users, get_user, update_user, delete_user};
+pub use task::{create_task, get_tasks, get_task,
+     update_task, delete_task, get_tasks_by_user, search_tasks_by_title,
+     update_task_without_title};
+
+pub use user::{create_user, get_users, get_user, update_user, 
+    delete_user, get_user_by_username, authenticate_user};
 
 pub use reward::{create_reward, get_rewards, get_reward, update_reward, delete_reward};
 

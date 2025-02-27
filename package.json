@@ -1,0 +1,26 @@
+{
+  "scripts": {
+    "build:css": "npx postcss static/css/style.css -o static/css/output.css",
+    "watch:css": "npx postcss static/css/style.css -o static/css/output.css -w"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.8"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.0.8",
+    "postcss-cli": "^11.0.0",
+    "postcss-import": "16.1.0"
+  },
+  "name": "life-tracker",
+  "version": "1.0.0",
+  "main": "tailwind.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

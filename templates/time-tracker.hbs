@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Life Tracker - Time Tracker</title>
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <link href="/s/css/output.css" rel="stylesheet">
+
+</head>
+<body >
+  <div class="flex flex-col items-center space-y-6 max-w-sm mx-auto">
+    <div class="w-full bg-white p-6 rounded-2xl shadow-lg">
+      <h1 class="text-2xl font-bold mb-4 text-center text-sage-dark">Life Tracker</h1>
+
+      <div class="mb-4">
+        <label class="block text-sage-dark">What are you working on now?</label>
+        <input 
+          type="text" 
+          id="taskInput" 
+          name="taskInput"
+          class="w-full p-2 border rounded mt-1 bg-sage-light text-sage-dark" 
+          placeholder="Type your task..."
+          hx-get="./autocomplete"
+          hx-trigger="keyup changed delay:500ms"
+          hx-target="#suggestions"
+          hx-swap="innerHTML"
+        >
+        <ul id="suggestions" class="mt-2">
+          {{#each suggestions}}
+          <li class="p-2 bg-white border-b cursor-pointer hover:bg-sage-light" onclick="selectSuggestion('{{this}}')">
+            {{this}}
+          </li>
+          {{/each}}
+        </ul>
+      </div>
+
+      <div class="space-y-2">
+        <button 
+          class="w-full bg-sage-light text-white px-4 py-2 rounded-lg" 
+          data-state="stopped" 
+          onclick="toggleTask(this)"
+          hx-post="./start-task"
+          hx-trigger="click"
+        >
+          Start Task
+        </button>
+      </div>
+
+      <button 
+        class="w-full mt-4 bg-sage-dark text-white px-4 py-2 rounded-lg" 
+        onclick="submitTask(event)"
+      >
+        Submit
+      </button>
+    </div>
+
+    <div id="results" class="w-full bg-white p-4 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-bold mb-2 text-center text-sage-dark">Active Tasks</h2>
+      {{#each tasks}}
+      {{ task }}
+      <div class="flex justify-between items-center bg-sage-light p-2 rounded-lg mb-2">
+        <span class="hidden">{{this.id}}</span>
+        <span class="text-sage-dark">{{this.title}}</span>
+        <button 
+          class="bg-sage-dark text-white px-2 py-1 rounded-lg text-sm" 
+          onclick="markTaskStopped(this,{{this.id}})"
+        >
+          Stop
+        </button>
+      </div>
+      {{ /each}}
+    </div>
+  </div>
+    <script src="/s/js/script.js"></script>
+
+</body>
+</html>

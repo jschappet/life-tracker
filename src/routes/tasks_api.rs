@@ -1,10 +1,63 @@
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+extern crate serde;
+
+use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
 use crate::models::{NewTask, Task};
-use crate::crud::{create_task, get_tasks, update_task, delete_task};
+use crate::crud::{create_task, delete_task, get_task, get_tasks, update_task, update_task_without_title};
 use crate::state::AppState;
 use serde_json::json;
+use crate::auth::get_user_from_request;
+use serde::Deserialize;
+use chrono::{Utc, Duration};
 
-#[post("/api/tasks")]
+#[derive(Deserialize, Debug)]
+struct SubmitTaskData {
+    #[serde(rename = "taskInput")]
+    title: String,
+    // Optional fields can be added later if needed
+}
+
+// Create struct for UpdateTask
+#[derive(Deserialize, Debug)]
+struct UpdateTask {
+    #[serde(rename = "taskInput")]
+    title: String,
+    task_id: i32,
+    notes: Option<String>,
+    status: Option<String>,
+}
+
+#[post("/tt-update-task")]
+async fn tt_update_task(
+    data: web::Data<AppState<'_>>, 
+    req: HttpRequest,    
+    new_task: web::Json<UpdateTask>,
+) -> impl Responder {
+    let conn = &mut data.db_pool.get().expect("Database connection failed");
+    
+    if let Some(user) = get_user_from_request(&req, conn) {
+        //log::debug!("Update Task - Request: {:?}", req);
+        log::debug!("Update Task - Request: {:?}", new_task.title);
+        log::debug!("Update Task - user: {:?}", user);
+        match update_task_without_title(
+            conn,
+            new_task.task_id,
+            new_task.notes.as_deref(),
+            None, // Assuming no due date update
+            new_task.status.as_deref(),
+        ) {
+            Ok(task) => HttpResponse::Ok().json(json!({
+                "status": "success",
+                "message": "Task updated",
+                "task": task
+            })),
+            Err(_) => HttpResponse::InternalServerError().body("Failed to update task"),
+        }
+    } else {
+        HttpResponse::Unauthorized().finish()
+    }   
+}
+
+#[post("/tasks")]
 pub async fn create_task_api<'hb>(
     data: web::Data<AppState<'hb>>,
     new_task: web::Json<NewTask>,
@@ -16,13 +69,44 @@ pub async fn create_task_api<'hb>(
         &new_task.title,
         new_task.description.as_deref(),
         new_task.due_date,
+        new_task.user_id,
     ) {
         Ok(task) => HttpResponse::Ok().json(task),
         Err(_) => HttpResponse::InternalServerError().body("Failed to create task"),
     }
 }
 
-#[get("/api/tasks")]
+#[post("/submit-task")]
+async fn submit_task(
+    data: web::Data<AppState<'_>>, 
+    req: HttpRequest,
+    task_data: web::Json<SubmitTaskData>
+) -> impl Responder {
+    let conn = &mut data.db_pool.get().expect("Database connection failed");
+
+    if let Some(user) = get_user_from_request(&req, conn) {
+        log::debug!("Submit Task - Request data: {:?}", task_data);
+        
+        let task_due_date = Utc::now().naive_utc().date() + Duration::days(1);
+        match create_task(conn, &task_data.title, Some(""), Some(task_due_date), user.id) {
+            Ok(task) => HttpResponse::Ok().json(json!({
+                "status": "success",
+                "message": "Task submitted",
+                "task": {
+                    "title": task_data.title,
+                    "user_id": user.id,
+                    "task_id": task.id
+                }
+            })),
+            Err(_) => HttpResponse::InternalServerError().body("Failed to create task"),
+        }
+    } else {
+        log::debug!("Unauthorized access attempt: {:?}", req);
+        HttpResponse::Unauthorized().finish()
+    }
+}
+
+#[get("/tasks")]
 pub async fn get_tasks_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_tasks(conn) {
@@ -31,14 +115,20 @@ pub async fn get_tasks_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Responde
     }
 }
 
-#[get("/tasks")]
-pub async fn get_tasks_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
-    let conn = &mut data.db_pool.get().expect("Database connection failed");
+#[get("/page/tasks")]
+pub async fn get_tasks_page<'hb>(data: web::Data<AppState<'hb>>, req: HttpRequest) -> impl Responder {
+    let conn= &mut data.db_pool.get().expect("Database connection failed");
     let hb = &data.hb;
+
+    let user = match get_user_from_request(&req, conn) {
+        Some(user) => user,
+        None => return HttpResponse::Unauthorized().body("Unauthorized"),
+    };
+    log::debug!("User: {:?}", user);
 
     match get_tasks(conn) {
         Ok(tasks) => {
-            let data = json!({ "tasks": tasks });
+            let data = json!({ "tasks": tasks, "user": user });
             match hb.render("partials/daily_tasks", &data) {
                 Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
                 Err(err) => {
@@ -51,7 +141,7 @@ pub async fn get_tasks_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Respond
     }
 }
 
-#[put("/api/task/{task_id}")]
+#[put("/task/{task_id}")]
 pub async fn update_task_api<'hb>(
     data: web::Data<AppState<'hb>>,
     task_id: web::Path<i32>,
@@ -64,13 +154,14 @@ pub async fn update_task_api<'hb>(
         &updated_task.title,
         updated_task.description.as_deref(),
         updated_task.due_date,
+        Some("pending")
     ) {
         Ok(task) => HttpResponse::Ok().json(task),
         Err(_) => HttpResponse::InternalServerError().body("Failed to update task"),
     }
 }
 
-#[delete("/api/task/{task_id}")]
+#[delete("/task/{task_id}")]
 pub async fn delete_task_api<'hb>(data: web::Data<AppState<'hb>>, task_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let new_task_id: i32 = task_id.into_inner();
@@ -85,5 +176,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .service(get_tasks_api)
        .service(update_task_api)
        .service(get_tasks_page)
-       .service(delete_task_api);
+       .service(delete_task_api)
+       .service(submit_task)
+       .service(tt_update_task);  // Ensure the tt_update_task route is added
 }

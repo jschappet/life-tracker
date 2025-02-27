@@ -3,7 +3,7 @@ use crate::crud::{create_reward, get_rewards, get_reward, update_reward, delete_
 use crate::state::AppState;
 use crate::models::{Reward, NewReward};
 
-#[post("/api/rewards")]
+#[post("/rewards")]
 pub async fn create_reward_api<'hb>(
     data: web::Data<AppState<'hb>>,
     new_reward: web::Json<NewReward>,
@@ -21,7 +21,7 @@ pub async fn create_reward_api<'hb>(
     }
 }
 
-#[get("/api/rewards")]
+#[get("/rewards")]
 pub async fn get_rewards_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_rewards(conn) {
@@ -30,7 +30,7 @@ pub async fn get_rewards_api<'hb>(data: web::Data<AppState<'hb>>) -> impl Respon
     }
 }
 
-#[get("/api/reward/{reward_id}")]
+#[get("/reward/{reward_id}")]
 pub async fn get_reward_api<'hb>(data: web::Data<AppState<'hb>>, reward_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_reward(conn, reward_id.into_inner()) {
@@ -39,7 +39,7 @@ pub async fn get_reward_api<'hb>(data: web::Data<AppState<'hb>>, reward_id: web:
     }
 }
 
-#[put("/api/reward/{reward_id}")]
+#[put("/reward/{reward_id}")]
 pub async fn update_reward_api<'hb>(
     data: web::Data<AppState<'hb>>,
     reward_id: web::Path<i32>,
@@ -57,7 +57,7 @@ pub async fn update_reward_api<'hb>(
     }
 }
 
-#[delete("/api/reward/{reward_id}")]
+#[delete("/reward/{reward_id}")]
 pub async fn delete_reward_api<'hb>(data: web::Data<AppState<'hb>>, reward_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let id = reward_id.into_inner();
@@ -67,7 +67,7 @@ pub async fn delete_reward_api<'hb>(data: web::Data<AppState<'hb>>, reward_id: w
     }
 }
 
-#[get("/rewards")]
+#[get("/page/rewards")]
 pub async fn get_rewards_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_rewards(conn) {

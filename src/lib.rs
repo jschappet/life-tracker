@@ -4,3 +4,6 @@ pub mod models;
 pub mod crud;
 pub mod schema;
 pub mod db;
+pub mod claims;
+pub mod auth;
+pub mod types;

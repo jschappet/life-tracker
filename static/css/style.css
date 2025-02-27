@@ -1,25 +1,113 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f0f0f0;
+@import "tailwindcss";
+
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+
+@layer utilities {
+    .bg-sage-light { background-color: #B2BEB5; }
+  .bg-sage-dark { background-color: #78866B; }
+  .bg-sage-muted { background-color: #D8E2DC; }
+  .text-sage-muted { color: #78866B; }
+  .text-sage-dark { color: #545e57; }
+
 }
-h1 {
-    color: #333;
+@layer base {
+
+
+
+  body {
+/*     @apply bg-blue-950 min-h-screen flex items-center justify-center py-16
+ */   
+      @apply bg-green-100 min-h-screen flex flex-col items-center justify-center py-10 px-4
+  }
+
+  input {
+    @apply w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+  }
+
+  h1 {
+    @apply text-2xl font-bold text-right text-gray-900 mb-8
+  }
+
+  h2 {
+    @apply text-xl text-gray-900 mb-4
+  }
 }
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-li {
-    background: #fff;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+
+
+@layer components {
+
+  .nav-item {
+    @apply text-blue-500 hover:underline hover:text-red-900
+  }
+  .card {
+    @apply bg-white shadow-md rounded-lg p-6 mb-4
+  }
+
+  .card-header {
+    @apply text-lg font-semibold text-gray-900 mb-2
+  }
+
+  .card-body {
+    @apply text-gray-700
+  }
+
+  .card-footer {
+    @apply text-right
+  }
+
+  .dashboard-container {
+    @apply container mx-auto px-4
+  }
+
+  .dashboard-nav {
+    @apply sticky top-0 bg-white shadow p-4 rounded-2xl mb-6 flex justify-between items-center
+  }
+
+  .dashboard-title {
+    @apply text-2xl font-bold
+  }
+
+  .nav-list {
+    @apply flex space-x-4
+  }
+
+  .nav-logout {
+    @apply  text-red-500
+  }
+
+  .dashboard-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-6
+  }
+
+  .dashboard-section {
+    @apply relative bg-white p-6 rounded-2xl shadow h-96 overflow-y-auto
+  }
+
+  .section-title {
+    @apply text-2xl font-semibold mb-4
+  }
+
+  .add-button {
+    @apply absolute top-4 right-4 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors
+  }
+
+  .task-item {
+    @apply bg-white p-4 rounded shadow mb-3
+  }
+
+  .task-title {
+    @apply text-xl font-bold
+  }
+
+  .task-description {
+    @apply text-gray-700
+  }
+
+  .task-due-date {
+    @apply text-gray-600
+  }
 }

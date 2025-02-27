@@ -3,7 +3,7 @@ use crate::crud::{create_daily_todo, get_daily_todos_by_user, update_daily_todo,
 use crate::state::AppState;
 use crate::models::{DailyTodo, NewDailyTodo};
 
-#[post("/api/daily_todo")]
+#[post("/daily_todo")]
 pub async fn create_daily_todo_api<'hb>(
     data: web::Data<AppState<'hb>>,
     new_daily_todo: web::Json<NewDailyTodo>,
@@ -22,7 +22,7 @@ pub async fn create_daily_todo_api<'hb>(
     }
 }
 
-#[get("/api/daily_todo/{user_id}")]
+#[get("/daily_todo/{user_id}")]
 pub async fn get_daily_todo_api<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     log::info!("Getting daily todos for user {:?}", user_id);
@@ -32,7 +32,7 @@ pub async fn get_daily_todo_api<'hb>(data: web::Data<AppState<'hb>>, user_id: we
     }
 }
 
-#[put("/api/daily_todo/{daily_todo_id}")]
+#[put("/daily_todo/{daily_todo_id}")]
 pub async fn update_daily_todo_api<'hb>(
     data: web::Data<AppState<'hb>>,
     daily_todo_id: web::Path<i32>,
@@ -49,7 +49,7 @@ pub async fn update_daily_todo_api<'hb>(
     }
 }
 
-#[delete("/api/daily_todo/{daily_todo_id}")]
+#[delete("/daily_todo/{daily_todo_id}")]
 pub async fn delete_daily_todo_api<'hb>(data: web::Data<AppState<'hb>>, daily_todo_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let id = daily_todo_id.into_inner();

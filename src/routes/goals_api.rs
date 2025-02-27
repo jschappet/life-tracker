@@ -5,7 +5,7 @@ use crate::models::{Goal, NewGoal};
 use serde_json::json;
 
 
-#[post("/api/goals")]
+#[post("/goals")]
 pub async fn create_goal_api<'hb>(
     data: web::Data<AppState<'hb>>,
     new_goal: web::Json<NewGoal>,
@@ -25,7 +25,7 @@ pub async fn create_goal_api<'hb>(
     }
 }
 
-#[get("/api/goal/{goal_id}")]
+#[get("/goal/{goal_id}")]
 pub async fn get_goal_by_id_api<'hb>(data: web::Data<AppState<'hb>>, goal_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_goal_by_id(conn, goal_id.into_inner()) {
@@ -34,7 +34,7 @@ pub async fn get_goal_by_id_api<'hb>(data: web::Data<AppState<'hb>>, goal_id: we
     }
 }
 
-#[get("/api/goals/{user_id}")]
+#[get("/goals/{user_id}")]
 pub async fn get_goals_api<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     match get_goals_by_user(conn, user_id.into_inner()) {
@@ -43,7 +43,7 @@ pub async fn get_goals_api<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Pa
     }
 }
 
-#[put("/api/goal/{goal_id}")]
+#[put("/goal/{goal_id}")]
 pub async fn update_goal_api<'hb>(
     data: web::Data<AppState<'hb>>,
     goal_id: web::Path<i32>,
@@ -63,7 +63,7 @@ pub async fn update_goal_api<'hb>(
     }
 }
 
-#[delete("/api/goal/{goal_id}")]
+#[delete("/goal/{goal_id}")]
 pub async fn delete_goal_api<'hb>(data: web::Data<AppState<'hb>>, goal_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let id = goal_id.into_inner();
@@ -73,7 +73,7 @@ pub async fn delete_goal_api<'hb>(data: web::Data<AppState<'hb>>, goal_id: web::
     }
 }
 
-#[get("/goals/{user_id}")]
+#[get("/page/goals/{user_id}")]
 pub async fn get_goals_page<'hb>(data: web::Data<AppState<'hb>>, user_id: web::Path<i32>) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
     let hb = &data.hb;
