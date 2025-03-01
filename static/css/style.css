@@ -1,10 +1,14 @@
 @import "tailwindcss";
+@plugin "daisyui" {
+  themes: garden --default , dark --prefersdark, forest;
+}
+@source "./templates/*.{html,js,hbs}";
+
 
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
-
 
 @layer utilities {
     .bg-sage-light { background-color: #B2BEB5; }
@@ -14,6 +18,7 @@
   .text-sage-dark { color: #545e57; }
 
 }
+
 @layer base {
 
 
