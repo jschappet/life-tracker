@@ -1,0 +1,24 @@
+        <div class="card bg-base-100 shadow-lg p-4 w-full">
+          <h2 class="card-title text-xl font-bold mb-4">Tasks</h2>
+          <table id="tasks-list" class="table table-zebra w-full">
+            <tr class="task-item">
+              <th class="task-title">Title</th>
+              <th class="task-description">Description</th>
+              <th class="task-due-date">Due Date </th>
+              <th class="task-start">Start Date</th>
+              <th class="task-end">End Date</th>
+              <th class="task-end">Status</th>
+
+            </tr>
+            {{#each tasks}}
+            <tr class="task-item task-status-{{this.status}}">
+              <th class="task-title">{{this.title}}</th>
+              <td class="task-description">{{this.description}}</td>
+              <td class="task-due-date">{{this.due_date}}</td>
+              <td class="task-start">{{this.start_time}}</td>
+              <td class="task-end">{{this.end_time}}</td>
+              <td class="task-end">{{this.status}}</td>
+
+            </tr>
+            {{/each}}
+          </table>
