@@ -2,7 +2,7 @@ extern crate serde;
 
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
 use crate::models::{NewTask, Task};
-use crate::crud::{create_task, delete_task, get_task, get_tasks, update_task, update_task_without_title};
+use crate::crud::{create_task, delete_task, get_tasks, update_task, update_task_without_title};
 use crate::state::AppState;
 use serde_json::json;
 use crate::auth::get_user_from_request;

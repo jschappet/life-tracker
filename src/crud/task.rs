@@ -1,7 +1,7 @@
 use diesel::prelude::*;
-use diesel::row::NamedRow;
+//use diesel::row::NamedRow;
 use diesel::sqlite::SqliteConnection;
-use crate::models::{task, NewTask, Task};
+use crate::models::{ NewTask, Task};
 use crate::schema::tasks::dsl::*;
 use log::info;
 

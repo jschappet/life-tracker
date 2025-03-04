@@ -1,8 +1,8 @@
 use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
-use chrono::{Duration, Utc};
+//use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
-use crate::claims::{Claims, create_jwt, decode_jwt};
-use crate::crud::{create_task, get_tasks_by_user, search_tasks_by_title};
+use crate::claims::{Claims, create_jwt};
+use crate::crud::search_tasks_by_title;
 use crate::{crud, models};
 use crate::state::AppState;
 use serde_json::json;
@@ -216,39 +216,7 @@ struct UpdateTask {
     notes: Option<String>,
     status: Option<String>,
 }
-/*
-#[post("/tt-update-task")]
-async fn tt_update_task(
-    data: web::Data<AppState<'_>>, 
-    req: HttpRequest,    
-    new_task: web::Json<UpdateTask>,
-) -> impl Responder {
-    let conn = &mut data.db_pool.get().expect("Database connection failed");
-    
-    if let Some(user) = get_user_from_request(&req, conn) {
-        log::debug!("Update Task - Request: {:?}", req);
 
-        log::debug!("Update Task - user: {:?}", user);
-        match update_task(
-            conn,
-            new_task.task_id,
-            &new_task.title,
-            new_task.notes.as_deref(),
-            None, // Assuming no due date update
-            new_task.status.as_deref(),
-        ) {
-            Ok(task) => HttpResponse::Ok().json(json!({
-                "status": "success",
-                "message": "Task updated",
-                "task": task
-            })),
-            Err(_) => HttpResponse::InternalServerError().body("Failed to update task"),
-        }
-    } else {
-        HttpResponse::Unauthorized().finish()
-    }   
-}
- */
 
 #[post("/start-task")]
 async fn start_task(data: web::Data<AppState<'_>>, req: HttpRequest) -> impl Responder {
@@ -325,54 +293,6 @@ async fn autocomplete(data: web::Data<AppState<'_>>, req: HttpRequest, session: 
     }
 }
 
-/* 
-    let hb = &data.hb;
-    let conn = &mut data.db_pool.get().expect("Database connection failed");
-    let user = match crud::get_user_by_username(conn, username) {
-            Ok(user) => user,
-            Err(_) => return HttpResponse::Unauthorized().body("Unauthorized"),
-        };
-    log::debug!("User: {:?}", user);
-    let data = get_dashbard_data(user, conn);
-    match hb.render("dashboard", &data) {
-        Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
-        Err(err) => {
-            log::error!("{}", err.reason());
-            HttpResponse::InternalServerError().body("Failed to render template")
-        },
-    }
-*/
-
-
-
-#[get("/autocomplete_old")]
-async fn autocomplete_old(data: web::Data<AppState<'_>>, req: HttpRequest, session: actix_session::Session) -> impl Responder {
-    log::debug!("Autocomplete - Query String: {:?}", req);
-    
-    let conn = &mut data.db_pool.get().expect("Database connection failed");
-   
-    if let Some(user) = get_user_from_session(&session, conn) {
-        let query: String = req.query_string().to_string();
-
-
-        // TODO - parse queryString 
-        let query = query.split("=").collect::<Vec<&str>>()[1].to_string();
-        let query = query.replace("%20", " ");
-        //  TODO Create a querytype struct for each autocomplete form
-        // TODO match based on querytype
-
-        let tasks = search_tasks_by_title(conn, &query, user.id).unwrap_or_else(|_| vec![]);
-        let suggestions: Vec<_> = tasks.into_iter().map(|task| task.title).collect();
-        log::debug!("Autocomplete - Suggestions: {:?}", suggestions);
-        HttpResponse::Ok().json(json!({
-            "status": "success",
-            "suggestions": suggestions
-        }))
-    } else {
-        log::debug!("Unauthorized access to autocomplete");
-        HttpResponse::Unauthorized().finish()
-    }
-}
 
 
 #[post("/end-task")]
