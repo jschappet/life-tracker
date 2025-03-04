@@ -31,7 +31,11 @@ fn get_dashbard_data<'hb>(user: models::User, conn: &mut diesel::r2d2::PooledCon
     // Filter out the tasks that are 'completed'
     let tasks = crud::get_tasks_by_user(conn, user.id).ok()?;
     let active_tasks: Vec<_> = tasks.into_iter().filter(|task| task.status.clone().unwrap() != "completed").collect();
-    let data = json!({"user": user, "tasks": active_tasks});
+    //let tasks: Vec<_> = tasks.into_iter().filter(|task| task.status.clone().unwrap() == "completed").collect();
+
+    let data = json!({"user": user, 
+            "tasks": active_tasks}
+        );
     Some(data)
 }
 
@@ -265,6 +269,20 @@ async fn start_task(data: web::Data<AppState<'_>>, req: HttpRequest) -> impl Res
 }
 
 
+#[get("/footer")]
+async fn footer(data: web::Data<AppState<'_>>) -> impl Responder {
+        let hb = &data.hb;
+
+        match hb.render("partials/footer", &json!({"suggestions": []}))
+        {
+            Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
+            Err(err) => {
+                log::error!("{}", err.reason());
+                HttpResponse::InternalServerError().body("Failed to render template")
+            },
+        }
+}
+
 
 #[get("/autocomplete")]
 async fn autocomplete(data: web::Data<AppState<'_>>, req: HttpRequest, session: actix_session::Session) -> impl Responder {
@@ -274,7 +292,7 @@ async fn autocomplete(data: web::Data<AppState<'_>>, req: HttpRequest, session: 
    
     if let Some(user) = get_user_from_session(&session, conn) {
         let query: String = req.query_string().to_string();
-
+        log::debug!("Query: {}", query);
 
         // TODO - parse queryString 
         let query = query.split("=").collect::<Vec<&str>>()[1].to_string();
@@ -387,6 +405,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .service(start_task)
        .service(end_task)
        .service(autocomplete)
+       .service(footer)
        //.service(submit_task)
        //.service(tt_update_task)
        ;  // Ensure the tt_update_task route is added

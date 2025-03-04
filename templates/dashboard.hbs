@@ -1,100 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Life Tracker Dashboard</title>
-  <link href="/s/css/output.css" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <link href="/tracker/s/css/output.css" rel="stylesheet">
 </head>
-<body class="bg-page">
-  <div class="dashboard-container">
-    <nav class="dashboard-nav">
-      <span class="dashboard-title">Life Tracker</span>
-      <ul class="nav-list">
-        <li><a href="./time-tracker" class="nav-item">Time Traker</a></li>
-        <li><a href="#daily-todos-list" class="nav-item">Daily Todos</a></li>
-        <li><a href="#projects-list" class="nav-item">Projects</a></li>
-        <li><a href="#goals-list" class="nav-item">Goals</a></li>
-        <li><a href="#rewards-list" class="nav-item">Rewards</a></li>
-        <li><a href="/logout" class="nav-logout">Log Out</a></li>
+
+<body class="bg-base-100">
+  <!-- Top Navbar -->
+  <div class="navbar bg-base-100 shadow-sm mb-4 w-full">
+    <div class="flex-1">
+      <a class="btn btn-ghost text-xl">Life Tracker - Dashboard</a>
+    </div>
+    <div class="flex-none">
+      <ul class="menu menu-horizontal px-1">
+        <li><a href="./time-tracker">Time Tracker</a></li>
+        <li><a href="#daily-todos-list">Daily Todos</a></li>
+        <li><a href="#projects-list">Projects</a></li>
+        <li><a href="#goals-list">Goals</a></li>
+        <li><a href="#rewards-list">Rewards</a></li>
+        <li>
+          <details>
+            <summary>Profile</summary>
+            <ul class="bg-base-100 rounded-t-none p-2">
+              <li><a href="/logout" class="nav-logout">Log Out</a></li>
+            </ul>
+          </details>
+        </li>
       </ul>
-    </nav>
+    </div>
+  </div>
 
-    <div class="dashboard-grid">
-      <!-- Tasks Section -->
-      <div class="dashboard-section">
-        <h2 class="section-title">Tasks</h2>
-        <div id="tasks-list">
-          {{#each tasks}}
-            <div class="task-item">
-              <h3 class="task-title">{{this.title}}</h3>
-              <p class="task-description">{{this.description}}</p>
-              <p class="task-due-date">Due: {{this.due_date}}</p>
-            </div>
-          {{/each}}
-        </div>
-        <button class="add-button">
+  <div class="flex h-screen">
+    <!-- Left Panel Navigation -->
+    <div class="w-1/5 bg-base-200 shadow-lg p-4">
+      <ul class="menu bg-base-100 rounded-box">
+        <li><a href="./time-tracker">Time Tracker</a></li>
+        <li><a href="#daily-todos-list">Daily Todos</a></li>
+        <li><a href="#projects-list">Projects</a></li>
+        <li><a href="#goals-list">Goals</a></li>
+        <li><a href="#rewards-list">Rewards</a></li>
+        <li>
+          <details>
+            <summary>Profile</summary>
+            <ul class="bg-base-100 rounded-t-none p-2">
+              <li><a href="/logout" class="nav-logout">Log Out</a></li>
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Dashboard Content -->
+      <div class="flex-1 overflow-auto p-4 space-y-4">
+        <!-- Tasks Section -->
+        <div id="tasks-section" class="card bg-base-100 shadow-lg p-4 w-full"
+           hx-get="../api/page/tasks" hx-trigger="load"></div>
+        <button class="btn btn-primary mt-4">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
         </button>
-      </div>
 
-      <!-- Daily Todos Section -->
-      <div class="dashboard-section">
-        <h2 class="section-title">Daily Todos</h2>
-        <div id="daily-todos-list">
-          <!-- Daily todos will load here -->
+        <!-- Daily Todos Section -->
+        <div class="card bg-base-100 shadow-lg p-4 w-full">
+          <h2 class="card-title text-2xl font-bold mb-4">Daily Todos</h2>
+          <div id="daily-todos-list">
+            <!-- Daily todos will load here -->
+          </div>
+          <button class="btn btn-primary mt-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
         </div>
-        <button class="add-button">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </div>
 
-      <!-- Projects Section -->
-      <div class="dashboard-section">
-        <h2 class="section-title">Projects</h2>
-        <div id="projects-list">
-          <!-- Projects will load here -->
+        <!-- Projects Section -->
+        <div class="card bg-base-100 shadow-lg p-4 w-full">
+          <h2 class="card-title text-2xl font-bold mb-4">Projects</h2>
+          <div id="projects-list">
+            <!-- Projects will load here -->
+          </div>
+          <button class="btn btn-primary mt-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
         </div>
-        <button class="add-button">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </div>
 
-      <!-- Goals Section -->
-      <div class="dashboard-section">
-        <h2 class="section-title">Goals</h2>
-        <div id="goals-list">
-          <!-- Goals will load here -->
+        <!-- Goals Section -->
+        <div class="card bg-base-100 shadow-lg p-4 w-full">
+          <h2 class="card-title text-2xl font-bold mb-4">Goals</h2>
+          <div id="goals-list">
+            <!-- Goals will load here -->
+          </div>
+          <button class="btn btn-primary mt-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
         </div>
-        <button class="add-button">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </div>
 
-      <!-- Rewards Section -->
-      <div class="dashboard-section">
-        <h2 class="section-title">Rewards</h2>
-        <div id="rewards-list">
-          <!-- Rewards will load here -->
+        <!-- Rewards Section -->
+        <div class="card bg-base-100 shadow-lg p-4 w-full">
+          <h2 class="card-title text-2xl font-bold mb-4">Rewards</h2>
+          <div id="rewards-list">
+            <!-- Rewards will load here -->
+          </div>
+          <button class="btn btn-primary mt-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
         </div>
-        <button class="add-button">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
       </div>
     </div>
   </div>
-      <script src="/s/js/script.js"></script>
+  <script src="/tracker/s/js/script.js"></script>
+  <div hx-get="./footer" hx-trigger="load"></div>
+  <script>
 
+    document.body.addEventListener("htmx:configRequest", function (evt) {
+      const authCookie = localStorage.getItem('auth_token');
+      if (authCookie) {           // Set the authentication header for all future requests                
+        evt.detail.headers["Authorization"] = "Bearer " + authCookie;
+      }
+    });
+  </script>
+  </script>
 </body>
-</html>
 
+</html>

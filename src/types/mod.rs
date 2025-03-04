@@ -1,5 +1,6 @@
 mod general;
 
+mod task_status;
 
 pub use general::{
     ErrorResponse, SuccessResponse, 
@@ -8,3 +9,5 @@ pub use general::{
     USER_IS_SUPERUSER_KEY,
     JWT_TOKEN,
 };
+
+pub use task_status::TaskStatus;

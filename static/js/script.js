@@ -152,15 +152,23 @@ function addTaskToList(task) {
   const taskElement = document.createElement('div');
   taskElement.className = 'flex justify-between items-center bg-sage-light p-2 rounded-lg mb-2';
   console.log(task);
-  taskElement.innerHTML = `
-      <span class="text-sage-dark">${task.title}</span>
-      <button 
-        class="bg-sage-dark text-white px-2 py-1 rounded-lg text-sm" 
-        onclick="markTaskStopped(this, ${task.id})"
-      >
-        Stop 
-      </button>
-    `;
+  taskElement.innerHTML = `<li class="list-row" id="task-${task.id}">
+    <div>
+      <img class="size-10 rounded-box" src="https://via.placeholder.com/40" alt="Task Icon"/>
+    </div>
+    <div>
+      <div class="font-semibold">${task.title}</div>
+      <div class="text-xs opacity-60">${task.description}</div>
+    </div>
+    <button class="btn btn-square btn-ghost" onclick="markTaskStopped(this, ${task.id})">
+      <svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor">
+          <path d="M6 3L20 12 6 21 6 3z"></path>
+        </g>
+      </svg>
+    </button>
+  </li>
+`;
 
   // Insert after the heading
   if (resultsDiv.children.length > 1) {
@@ -181,7 +189,7 @@ function submitTask(event) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ taskInput: taskInput.value })
+    body: JSON.stringify({ taskInput: taskInput.value, "status": "in_progress" })
   })
     .then(response => response.json())
     .then(data => {

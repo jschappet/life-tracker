@@ -13,6 +13,8 @@ use chrono::{Utc, Duration};
 struct SubmitTaskData {
     #[serde(rename = "taskInput")]
     title: String,
+    status: String,
+    
     // Optional fields can be added later if needed
 }
 
@@ -70,6 +72,7 @@ pub async fn create_task_api<'hb>(
         new_task.description.as_deref(),
         new_task.due_date,
         new_task.user_id,
+        new_task.status.clone(),
     ) {
         Ok(task) => HttpResponse::Ok().json(task),
         Err(_) => HttpResponse::InternalServerError().body("Failed to create task"),
@@ -88,14 +91,15 @@ async fn submit_task(
         log::debug!("Submit Task - Request data: {:?}", task_data);
         
         let task_due_date = Utc::now().naive_utc().date() + Duration::days(1);
-        match create_task(conn, &task_data.title, Some(""), Some(task_due_date), user.id) {
+        match create_task(conn, &task_data.title, Some(""), Some(task_due_date), user.id, Some(task_data.status.clone())) {
             Ok(task) => HttpResponse::Ok().json(json!({
                 "status": "success",
                 "message": "Task submitted",
                 "task": {
                     "title": task_data.title,
                     "user_id": user.id,
-                    "task_id": task.id
+                    "task_id": task.id,
+                    "description": task.description
                 }
             })),
             Err(_) => HttpResponse::InternalServerError().body("Failed to create task"),
@@ -129,7 +133,7 @@ pub async fn get_tasks_page<'hb>(data: web::Data<AppState<'hb>>, req: HttpReques
     match get_tasks(conn) {
         Ok(tasks) => {
             let data = json!({ "tasks": tasks, "user": user });
-            match hb.render("partials/daily_tasks", &data) {
+            match hb.render("partials/tasks", &data) {
                 Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
                 Err(err) => {
                     log::error!("{}", err.reason());

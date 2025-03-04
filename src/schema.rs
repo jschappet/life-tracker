@@ -59,6 +59,8 @@ diesel::table! {
         due_date -> Nullable<Date>,
         status -> Nullable<Text>,
         created_at -> Timestamp,
+        start_time -> Nullable<Timestamp>,
+        end_time -> Nullable<Timestamp>,
     }
 }
 

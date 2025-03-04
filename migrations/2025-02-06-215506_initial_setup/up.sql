@@ -9,6 +9,7 @@ CREATE TABLE users (
 
 INSERT INTO users (id, username, email, password_hash) 
 values (0,"Not Assigned","nobody@nowhere.com", "" );
+insert into users (username, password_hash, email) values ('admin','$2b$12$8/CLAWBT6MsKxkgptWfi6e4GpbZtdpJOyYCxbzfz6.Vy6oUn/O/tm','jschappet@gmail.com');
 
 CREATE TABLE goals (
     id INTEGER PRIMARY KEY AUTOINCREMENT  NOT NULL,
@@ -45,8 +46,13 @@ CREATE TABLE tasks (
     title TEXT NOT NULL,
     description TEXT,
     due_date DATE,
-    status TEXT CHECK(status IN ('pending', 'in_progress', 'completed')) DEFAULT 'pending',
+    status TEXT CHECK(
+            status IN ('pending', 'suspended','in_progress', 'completed')
+        ) 
+        DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
 );

@@ -13,6 +13,8 @@ pub struct Task {
     pub due_date: Option<NaiveDate>,
     pub status: Option<String>,
     pub created_at: NaiveDateTime,
+    pub start_time: Option<NaiveDateTime>,
+    pub end_time: Option<NaiveDateTime>,
 }
 
 
@@ -23,5 +25,8 @@ pub struct NewTask {
     pub description: Option<String>,
     pub due_date: Option<NaiveDate>,
     pub user_id: i32,
+    pub status: Option<String>,
     pub project_id: Option<i32>,
+    pub start_time: Option<NaiveDateTime>,
+    pub end_time: Option<NaiveDateTime>,
 }
