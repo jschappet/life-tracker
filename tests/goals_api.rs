@@ -1,17 +1,20 @@
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use actix_web::{test, web, App};
     use diesel::r2d2::{ConnectionManager, Pool};
     use diesel::prelude::*;
+    use handlebars::{DirectorySourceOptions, Handlebars};
     use life_tracker::state::AppState;
     
     //use life_tracker::models::Goal;
 
     use life_tracker::routes::goals_api;
-    use chrono::NaiveDate;
+  //  use chrono::NaiveDate;
 
-    fn get_app_state() -> AppState {
+    fn get_app_state<'hb>() -> AppState<'hb> {
         let manager = ConnectionManager::<SqliteConnection>::new(":memory:");
         let pool = Pool::builder().build(manager).expect("Failed to create pool");
         
@@ -31,9 +34,19 @@ mod tests {
             );
         ").execute(&mut conn).unwrap();
 
+        let dso = DirectorySourceOptions::default();
+
+        let mut handlebars = Handlebars::new();
+        handlebars
+            .register_templates_directory("./templates/", dso)
+            .expect("Failed to register templates directory");
+    
+        let handlebars = Arc::new(handlebars);
+
         AppState {
             db_pool: pool,
             omdb_api_key: "foo".to_string(),
+            hb: handlebars,
         }
     }
 
@@ -43,7 +56,11 @@ mod tests {
         let mut app = test::init_service(
             App::new()
                 .app_data(web::Data::new(app_state))
-                .configure(goals_api::config)
+                .service(
+                    web::scope("/tracker/api")
+                    .configure(goals_api::config)
+                )
+                
         ).await;
 
         let goal_json = r#"{
@@ -55,7 +72,7 @@ mod tests {
         }"#;
 
         let req = test::TestRequest::post()
-            .uri("/api/goals")
+            .uri("/tracker/api/goals")
             .append_header(("Content-Type", "application/json"))
             .set_payload(goal_json)
             .to_request();
@@ -70,11 +87,14 @@ mod tests {
         let mut app = test::init_service(
             App::new()
                 .app_data(web::Data::new(app_state))
-                .configure(goals_api::config)
-        ).await;
+                .service(
+                    web::scope("/tracker/api")
+                    .configure(goals_api::config)
+                )
+            ).await;
 
         let req = test::TestRequest::get()
-            .uri("/api/goals/42")
+            .uri("/tracker/api/goals/42")
             .to_request();
 
         let resp = test::call_service(&mut app, req).await;

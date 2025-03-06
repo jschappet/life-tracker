@@ -64,6 +64,7 @@ pub async fn create_task_api<'hb>(
     data: web::Data<AppState<'hb>>,
     new_task: web::Json<NewTask>,
 ) -> impl Responder {
+    log::debug!("create task api: started");
     let pool = &data.db_pool;
     let mut conn = pool.get().expect("Failed to get DB connection");
     match create_task(

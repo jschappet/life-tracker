@@ -153,7 +153,7 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/tracker")
                     .route("", web::get().to(|| async {
                         HttpResponse::Found()
-                            .header("LOCATION", "/tracker/app/login")
+                            .append_header(("LOCATION", "/tracker/app/login"))
                             .finish()
                     })),
             )

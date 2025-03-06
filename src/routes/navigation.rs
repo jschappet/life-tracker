@@ -202,20 +202,20 @@ async fn time_tracker(data: web::Data<AppState<'_>>, session: actix_session::Ses
     }
 }
 
-#[derive(Deserialize, Debug)]
-struct SubmitTaskData {
-    #[serde(rename = "taskInput")]
-    title: String,
-}
+// #[derive(Deserialize, Debug)]
+// struct SubmitTaskData {
+//     #[serde(rename = "taskInput")]
+//     title: String,
+// }
 
-#[derive(Deserialize, Debug)]
-struct UpdateTask {
-    #[serde(rename = "taskInput")]
-    title: String,
-    task_id: i32,
-    notes: Option<String>,
-    status: Option<String>,
-}
+// #[derive(Deserialize, Debug)]
+// struct UpdateTask {
+//     #[serde(rename = "taskInput")]
+//     title: String,
+//     task_id: i32,
+//     notes: Option<String>,
+//     status: Option<String>,
+// }
 
 
 #[post("/start-task")]

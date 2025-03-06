@@ -1,14 +1,17 @@
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use actix_web::{test, web, App};
     use diesel::r2d2::{ConnectionManager, Pool};
     use diesel::prelude::*;
+    use handlebars::{DirectorySourceOptions, Handlebars};
     use life_tracker::state::AppState;
-    use life_tracker::models::{NewDailyTodo, DailyTodo};
+  //  use life_tracker::models::{NewDailyTodo, DailyTodo};
     use life_tracker::routes::daily_todo_api;
-    use chrono::NaiveDate;
+   // use chrono::NaiveDate;
 
-    fn get_app_state() -> AppState {
+    fn get_app_state<'hb>() -> AppState<'hb> {
         let manager = ConnectionManager::<SqliteConnection>::new(":memory:");
         let pool = Pool::builder().build(manager).expect("Failed to create pool");
         
@@ -25,10 +28,19 @@ CREATE TABLE daily_todos (
     completed BOOLEAN DEFAULT FALSE 
 );
         ").execute(&mut conn).unwrap();
+        let dso = DirectorySourceOptions::default();
+
+        let mut handlebars = Handlebars::new();
+        handlebars
+            .register_templates_directory("./templates/", dso)
+            .expect("Failed to register templates directory");
+    
+        let handlebars = Arc::new(handlebars);
 
         AppState {
             db_pool: pool,
             omdb_api_key: "foo".to_string(),
+            hb: handlebars,
         }
     }
 
@@ -38,7 +50,10 @@ CREATE TABLE daily_todos (
         let mut app = test::init_service(
             App::new()
                 .app_data(web::Data::new(app_state))
-                .configure(daily_todo_api::config)
+                .service(
+                    web::scope("/tracker/api")
+                    .configure(daily_todo_api::config)
+                )
         ).await;
 
         let daily_todo_json = r#"{
@@ -49,7 +64,7 @@ CREATE TABLE daily_todos (
         }"#;
 
         let req = test::TestRequest::post()
-            .uri("/api/daily_todo")
+            .uri("/tracker/api/daily_todo")
             .append_header(("Content-Type", "application/json"))
             .set_payload(daily_todo_json)
             .to_request();
@@ -64,11 +79,14 @@ CREATE TABLE daily_todos (
         let mut app = test::init_service(
             App::new()
                 .app_data(web::Data::new(app_state))
-                .configure(daily_todo_api::config)
+                .service(
+                    web::scope("/tracker/api")
+                    .configure(daily_todo_api::config)
+                )
         ).await;
 
         let req = test::TestRequest::get()
-            .uri("/api/daily_todo/0")
+            .uri("/tracker/api/daily_todo/0")
             .to_request();
 
         let resp = test::call_service(&mut app, req).await;

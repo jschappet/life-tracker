@@ -1,14 +1,17 @@
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use actix_web::{test, web, App};
     use diesel::r2d2::{ConnectionManager, Pool};
     use diesel::prelude::*;
+    use handlebars::{DirectorySourceOptions, Handlebars};
     use life_tracker::state::AppState;
-    use life_tracker::models::{NewProject, Project};
+  //  use life_tracker::models::{NewProject, Project};
     use life_tracker::routes::projects_api;
-    use chrono::NaiveDateTime;
+  //  use chrono::NaiveDateTime;
 
-    fn get_app_state() -> AppState {
+    fn get_app_state<'hb>() -> AppState<'hb> {
         let manager = ConnectionManager::<SqliteConnection>::new(":memory:");
         let pool = Pool::builder().build(manager).expect("Failed to create pool");
         
@@ -26,9 +29,19 @@ CREATE TABLE projects (
 );
         ").execute(&mut conn).unwrap();
 
+        let dso = DirectorySourceOptions::default();
+
+        let mut handlebars = Handlebars::new();
+        handlebars
+            .register_templates_directory("./templates/", dso)
+            .expect("Failed to register templates directory");
+    
+        let handlebars = Arc::new(handlebars);
+
         AppState {
             db_pool: pool,
             omdb_api_key: "foo".to_string(),
+            hb: handlebars,
         }
     }
 
@@ -38,7 +51,10 @@ CREATE TABLE projects (
         let mut app = test::init_service(
             App::new()
                 .app_data(web::Data::new(app_state))
-                .configure(projects_api::config)
+                .service(
+                    web::scope("/tracker/api")
+                    .configure(projects_api::config)
+                )
         ).await;
 
         let project_json = r#"{
@@ -48,7 +64,7 @@ CREATE TABLE projects (
         }"#;
 
         let req = test::TestRequest::post()
-            .uri("/api/projects")
+            .uri("/tracker/api/projects")
             .append_header(("Content-Type", "application/json"))
             .set_payload(project_json)
             .to_request();
@@ -63,11 +79,14 @@ CREATE TABLE projects (
         let mut app = test::init_service(
             App::new()
                 .app_data(web::Data::new(app_state))
-                .configure(projects_api::config)
+                .service(
+                    web::scope("/tracker/api")
+                    .configure(projects_api::config)
+                )
         ).await;
 
         let req = test::TestRequest::get()
-            .uri("/api/projects")
+            .uri("/tracker/api/projects")
             .to_request();
 
         let resp = test::call_service(&mut app, req).await;

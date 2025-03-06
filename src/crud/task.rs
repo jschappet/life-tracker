@@ -23,12 +23,10 @@ pub fn create_task(
     use crate::schema::tasks::dsl::*;
     
 
-    // TODO -  fix this
     let start_time_val = match new_status.as_deref() {
         Some("in_progress") => Some(Utc::now().naive_utc()),
         _ => None,
     };
-
 
     let new_task = NewTask {
         title: task_title.to_string(),
@@ -41,12 +39,18 @@ pub fn create_task(
         end_time: None,
     };
 
-
     diesel::insert_into(tasks)
         .values(&new_task)
-        .execute(conn)?;
+        .execute(conn)
+        .map_err(|err| {
+            log::error!("Error inserting new task: {}", err);
+            err
+        })?;
 
-    tasks.order(id.desc()).first(conn)
+    tasks.order(id.desc()).first(conn).map_err(|err| {
+        log::error!("Error retrieving the newly created task: {}", err);
+        err
+    })
 }
 
 pub fn get_tasks(conn: &mut SqliteConnection) -> QueryResult<Vec<Task>> {
@@ -77,11 +81,15 @@ pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32
                     end_time.eq(date_now),
             )
             )
-            .execute(conn)?;
+            .execute(conn)
+            .map_err(|err| {
+                log::error!("Error updating task to completed: {}", err);
+                err
+            })?;
         },
 
         Some("in_progress") => {
-            log::debug!("Taask Update: {} {:?}",    other_task_id, new_status);
+            log::debug!("Task Update: {} {:?}",    other_task_id, new_status);
             diesel::update(tasks.find(other_task_id))
             .set(
                 (
@@ -91,10 +99,14 @@ pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32
                     start_time.eq(date_now),
             )
             )
-            .execute(conn)?;
+            .execute(conn)
+            .map_err(|err| {
+                log::error!("Error updating task to in_progress: {}", err);
+                err
+            })?;
         },
         _ => {
-            log::debug!("Taask Update: {} {:?}",    other_task_id, new_status);
+            log::debug!("Task Update: {} {:?}",    other_task_id, new_status);
             diesel::update(tasks.find(other_task_id))
             .set(
                 (
@@ -103,12 +115,19 @@ pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32
                     status.eq(new_status),
             )
             )
-            .execute(conn)?;
+            .execute(conn)
+            .map_err(|err| {
+                log::error!("Error updating task: {}", err);
+                err
+            })?;
         }
         
     };
 
-    tasks.find(other_task_id).first(conn)
+    tasks.find(other_task_id).first(conn).map_err(|err| {
+        log::error!("Error retrieving the updated task: {}", err);
+        err
+    })
 }
 
 pub fn update_task(conn: &mut SqliteConnection, other_task_id: i32, new_title: &str, new_description: Option<&str>, new_due_date: Option<NaiveDate>, new_status: Option<&str>) -> QueryResult<Task> {

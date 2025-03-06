@@ -170,6 +170,8 @@ function addTaskToList(task) {
   </li>
 `;
 
+
+// TODO - Fix this heading 
   // Insert after the heading
   if (resultsDiv.children.length > 1) {
     resultsDiv.children[1].after(taskElement);
@@ -222,23 +224,3 @@ async function handleLoginResponse(response) {
   }
 }
 
-
-
-// Example login form submission
-// document.getElementById('login-form').addEventListener('submit', async (e) => {
-//     e.preventDefault();
-//     const formData = new FormData(e.target);
-//     const data = Object.fromEntries(formData.entries());
-//     try {
-//         const response = await fetch('/auth/login', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(data)
-//         });
-//         await handleLoginResponse(response);
-//     } catch (error) {
-//         alert(`Error: ${error.message}`);
-//     }
-// });

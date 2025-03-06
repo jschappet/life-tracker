@@ -23,7 +23,7 @@ impl Claims {
             exp: (Utc::now() + Duration::try_hours(JWT_EXPIRATION_HOURS).unwrap()).timestamp(),
         }
     }
-}
+} 
 
 /// Create a json web token (JWT)
 pub(crate) fn create_jwt(claims: Claims) -> Result<String, Error> {
