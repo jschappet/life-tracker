@@ -1,20 +1,22 @@
 extern crate serde;
 
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
+use crate::crud::tags::add_tags_by_task;
 use crate::models::{NewTask, Task};
 use crate::crud::{create_task, delete_task, get_tasks, update_task, update_task_without_title};
 use crate::state::AppState;
+use crate::types::TaskStatus;
 use serde_json::json;
 use crate::auth::get_user_from_request;
 use serde::Deserialize;
 use chrono::{Utc, Duration};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 struct SubmitTaskData {
     #[serde(rename = "taskInput")]
     title: String,
     status: String,
-    
+    tags: Vec<i32>,
     // Optional fields can be added later if needed
 }
 
@@ -40,12 +42,13 @@ async fn tt_update_task(
         //log::debug!("Update Task - Request: {:?}", req);
         log::debug!("Update Task - Request: {:?}", new_task.title);
         log::debug!("Update Task - user: {:?}", user);
+        let ts = TaskStatus::from_str(new_task.status.clone().unwrap().as_str());
         match update_task_without_title(
             conn,
             new_task.task_id,
             new_task.notes.as_deref(),
             None, // Assuming no due date update
-            new_task.status.as_deref(),
+            ts.unwrap(),
         ) {
             Ok(task) => HttpResponse::Ok().json(json!({
                 "status": "success",
@@ -67,13 +70,15 @@ pub async fn create_task_api<'hb>(
     log::debug!("create task api: started");
     let pool = &data.db_pool;
     let mut conn = pool.get().expect("Failed to get DB connection");
+    let ts = TaskStatus::from_str(new_task.status.as_ref().unwrap().as_str());
+
     match create_task(
         &mut conn,
         &new_task.title,
         new_task.description.as_deref(),
         new_task.due_date,
         new_task.user_id,
-        new_task.status.clone(),
+        ts,
     ) {
         Ok(task) => HttpResponse::Ok().json(task),
         Err(_) => HttpResponse::InternalServerError().body("Failed to create task"),
@@ -89,20 +94,31 @@ async fn submit_task(
     let conn = &mut data.db_pool.get().expect("Database connection failed");
 
     if let Some(user) = get_user_from_request(&req, conn) {
-        log::debug!("Submit Task - Request data: {:?}", task_data);
+        log::debug!("Submit Task - Request data: {:?}", task_data.clone());
         
         let task_due_date = Utc::now().naive_utc().date() + Duration::days(1);
-        match create_task(conn, &task_data.title, Some(""), Some(task_due_date), user.id, Some(task_data.status.clone())) {
-            Ok(task) => HttpResponse::Ok().json(json!({
-                "status": "success",
-                "message": "Task submitted",
-                "task": {
-                    "title": task_data.title,
-                    "user_id": user.id,
-                    "task_id": task.id,
-                    "description": task.description
+        let ts = TaskStatus::from_str(&task_data.status);
+        // TODO: fix compile error
+        let tags = task_data.clone().tags;
+       
+        match create_task(conn, &task_data.title, Some(""), Some(task_due_date), user.id, ts) {
+            Ok(task) => {
+                log::debug!("Adding Tags...");
+                match add_tags_by_task(conn, task.id, tags) {
+                    Ok(tags) => HttpResponse::Ok().json(json!({
+                        "status": "success",
+                        "message": "Task submitted",
+                        "task": {
+                            "title": task_data.title,
+                            "user_id": user.id,
+                            "task_id": task.id,
+                            "description": task.description,
+                            "tags": tags,
+                        }
+                    })),
+                    Err(_) => HttpResponse::InternalServerError().body("Failed to retrieve tags"),
                 }
-            })),
+            },
             Err(_) => HttpResponse::InternalServerError().body("Failed to create task"),
         }
     } else {
@@ -159,7 +175,7 @@ pub async fn update_task_api<'hb>(
         &updated_task.title,
         updated_task.description.as_deref(),
         updated_task.due_date,
-        Some("pending")
+        TaskStatus::Pending
     ) {
         Ok(task) => HttpResponse::Ok().json(task),
         Err(_) => HttpResponse::InternalServerError().body("Failed to update task"),

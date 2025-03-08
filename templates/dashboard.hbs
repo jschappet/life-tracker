@@ -126,16 +126,7 @@
   </div>
   <script src="/tracker/s/js/script.js"></script>
   <div hx-get="./footer" hx-trigger="load"></div>
-  <script>
-
-    document.body.addEventListener("htmx:configRequest", function (evt) {
-      const authCookie = localStorage.getItem('auth_token');
-      if (authCookie) {           // Set the authentication header for all future requests                
-        evt.detail.headers["Authorization"] = "Bearer " + authCookie;
-      }
-    });
-  </script>
-  </script>
+  
 </body>
 
 </html>

@@ -99,6 +99,7 @@ if (document.getElementById('task-form')) {
 
 
 
+
 function toggleTask(button) {
   const isStarted = button.dataset.state === 'started';
   if (isStarted) {
@@ -149,34 +150,70 @@ function markTaskStopped(button, task_id) {
 
 function addTaskToList(task) {
   const resultsDiv = document.getElementById('results');
-  const taskElement = document.createElement('div');
-  taskElement.className = 'flex justify-between items-center bg-sage-light p-2 rounded-lg mb-2';
+  const taskElement = document.createElement('li');
+  taskElement.className = "list-row justify-between";
+  taskElement.id = "task-${task.id}";
   console.log(task);
-  taskElement.innerHTML = `<li class="list-row" id="task-${task.id}">
-    <div>
-      <img class="size-10 rounded-box" src="https://via.placeholder.com/40" alt="Task Icon"/>
-    </div>
-    <div>
-      <div class="font-semibold">${task.title}</div>
-      <div class="text-xs opacity-60">${task.description}</div>
-    </div>
-    <button class="btn btn-square btn-ghost" onclick="markTaskStopped(this, ${task.id})">
-      <svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor">
-          <path d="M6 3L20 12 6 21 6 3z"></path>
-        </g>
-      </svg>
-    </button>
-  </li>
-`;
+  taskElement.innerHTML = `<div>
+        <div class="font-semibold">${task.title}</div>
+        <div class="text-xs opacity-60">&nbsp;</div>
+      </div>
+      <button class="btn btn-square btn-ghost align-top" onclick="markTaskStopped(this, ${task.id})">
+        <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" 
+          viewBox="0 0 24 24" 
+          stroke-width=".6" stroke="currentColor" class="size-[1.5em]">
+          <path
+            d="m22.389,5.418l-3.808-3.808c-1.04-1.039-2.42-1.61-3.889-1.61h-5.385c-1.469,0-2.85.572-3.889,1.611l-3.808,3.808c-1.039,1.04-1.61,2.42-1.61,3.889v5.385c0,1.469.572,2.85,1.611,3.889l3.808,3.808c1.04,1.039,2.42,1.61,3.889,1.61h5.385c1.469,0,2.85-.572,3.889-1.611l3.808-3.808c1.039-1.04,1.61-2.42,1.61-3.889v-5.385c0-1.469-.572-2.85-1.611-3.889Zm-1.389,9.274c0,.667-.26,1.296-.732,1.768l-3.808,3.807c-.472.472-1.101.732-1.768.732h-5.385c-.667,0-1.296-.26-1.768-.732l-3.807-3.808c-.472-.472-.732-1.101-.732-1.768v-5.385c0-.667.26-1.296.732-1.768l3.808-3.807c.472-.472,1.101-.732,1.768-.732h5.385c.667,0,1.296.26,1.768.732l3.807,3.808c.472.472.732,1.101.732,1.768v5.385Zm-3.407-6.22c.567.604.538,1.553-.065,2.12l-4.145,3.896c-.699.7-1.629,1.052-2.565,1.052-.946,0-1.898-.36-2.622-1.084l-1.795-1.938c-.563-.608-.526-1.557.082-2.12.608-.563,1.557-.527,2.12.082l1.755,1.896c.23.229.668.229.938-.042l4.178-3.928c.604-.569,1.553-.539,2.12.065Z" />
+        </svg>
+      </button>
+  `;
 
-
-// TODO - Fix this heading 
-  // Insert after the heading
   if (resultsDiv.children.length > 1) {
-    resultsDiv.children[1].after(taskElement);
+    resultsDiv.children[0].after(taskElement);
   } else {
     resultsDiv.appendChild(taskElement);
+  }
+}
+
+let selectedTags = [];
+
+function toggleTag(tagId) {
+  console.log("toggling tag: ", tagId);
+  const index = selectedTags.indexOf(tagId);
+  const tagElement = document.querySelector(`.tag[data-id="${tagId}"]`);
+  if (index > -1) {
+    selectedTags.splice(index, 1);
+    tagElement.classList.remove('badge-primary');
+    tagElement.classList.add('badge-neutral');
+  } else {
+    selectedTags.push(tagId);
+    tagElement.classList.remove('badge-neutral');
+    tagElement.classList.add('badge-primary');
+  }
+}
+
+function addNewTag() {
+  const token = localStorage.getItem('auth_token');
+
+  const tagName = prompt("Enter new tag name:");
+  if (tagName) {
+    fetch('/tracker/api/tags', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ name: tagName })
+    })
+    .then(response => response.json())
+    .then(tag => {
+      const tagElement = document.createElement('span');
+      tagElement.className = 'tag badge-md badge badge-outline badge-neutral';
+      tagElement.dataset.id = tag.id;
+      tagElement.innerText = tag.name;
+      tagElement.onclick = () => toggleTag(tag.id);
+      document.getElementById('tags').appendChild(tagElement);
+    });
   }
 }
 
@@ -191,7 +228,7 @@ function submitTask(event) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ taskInput: taskInput.value, "status": "in_progress" })
+    body: JSON.stringify({ taskInput: taskInput.value, tags: selectedTags, "status": "in_progress" })
   })
     .then(response => response.json())
     .then(data => {
@@ -199,6 +236,7 @@ function submitTask(event) {
       if (data.status === 'success') {
         addTaskToList({ title: taskInput.value, id: data.task.task_id });
         taskInput.value = ''; // Clear the input
+        selectedTags = []; // Clear selected tags
       }
     })
     .catch(error => {
@@ -224,3 +262,10 @@ async function handleLoginResponse(response) {
   }
 }
 
+
+document.body.addEventListener("htmx:configRequest", function (evt) {
+  const authCookie = localStorage.getItem('auth_token');
+  if (authCookie) {           // Set the authentication header for all future requests                
+    evt.detail.headers["Authorization"] = "Bearer " + authCookie;
+  }
+});

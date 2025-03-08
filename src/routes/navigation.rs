@@ -3,6 +3,7 @@ use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
 use serde::{Deserialize, Serialize};
 use crate::claims::{Claims, create_jwt};
 use crate::crud::search_tasks_by_title;
+use crate::types::TaskStatus;
 use crate::{crud, models};
 use crate::state::AppState;
 use serde_json::json;
@@ -133,8 +134,8 @@ async fn handle_login(data: web::Data<AppState<'_>>, form: web::Form<LoginForm>,
             form.username.clone(),
             vec!["ADMIN".to_string(), "OP_GET_SECURED_INFO".to_string()]
             );
-
-            match create_jwt(claims) {
+            let jwt = create_jwt(claims);
+            match  jwt {
                 Ok(token) => {
                     // let response = LoginResponse {
                     //     message: "Login successful!".to_string(),
@@ -222,15 +223,23 @@ async fn time_tracker(data: web::Data<AppState<'_>>, session: actix_session::Ses
 async fn start_task(data: web::Data<AppState<'_>>, req: HttpRequest) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
    
-    if let Some(user) = get_user_from_request(&req, conn) {
-        log::debug!("Start Task - Request: {:?}", req);
+    if let Some(_user) = get_user_from_request(&req, conn) {
+        log::debug!("Start Task - user: {:?}", req);
 
-        // TODO: Implement task starting logic
-        HttpResponse::Ok().json(json!({
-            "status": "success",
-            "message": "Task started",
-            "user_id": user.id
-        }))
+        // Implement task starting logic
+        // Assuming task_id is passed as a query parameter
+        let task_id: i32 = req.match_info().query("task_id").parse().unwrap();
+        match crud::update_task_without_title(conn, task_id, None, None, TaskStatus::InProgress) {
+            Ok(task) => HttpResponse::Ok().json(json!({
+                "status": "success",
+                "message": "Task started",
+                "task": task
+            })),
+            Err(err) => HttpResponse::InternalServerError().json(json!({
+                "status": "error",
+                "message": format!("Failed to start task: {}", err)
+            })),
+        }
     } else {
         HttpResponse::Unauthorized().finish()
     }
@@ -252,6 +261,8 @@ async fn footer(data: web::Data<AppState<'_>>) -> impl Responder {
 }
 
 
+
+
 #[get("/autocomplete")]
 async fn autocomplete(data: web::Data<AppState<'_>>, req: HttpRequest, session: actix_session::Session) -> impl Responder {
     //log::debug!("Autocomplete - Query String: {:?}", req);
@@ -262,22 +273,21 @@ async fn autocomplete(data: web::Data<AppState<'_>>, req: HttpRequest, session: 
         let query: String = req.query_string().to_string();
         log::debug!("Query: {}", query);
 
-        // TODO - parse queryString 
+        // Parse query string
         let query = query.split("=").collect::<Vec<&str>>()[1].to_string();
         let query = query.replace("%20", " ");
-        //  TODO Create a querytype struct for each autocomplete form
-        // TODO match based on querytype
+        // Create a query type struct for each autocomplete form
+        // Match based on query type
         let hb = &data.hb;
 
         let data = if query == "" {
-
              json!({"suggestions": []})
         } else {
             let tasks = search_tasks_by_title(conn, &query, user.id).unwrap_or_else(|_| vec![]);
             log::debug!("Task Count: {}", tasks.len());
+            // Ensure each title is unique
             let suggestions: Vec<_> = tasks.into_iter().map(|task| task.title).collect();
             json!({"suggestions": suggestions})
-            
         };
         log::debug!("Autocomplete - Suggestions: {:?}", data);
         match hb.render("partials/autocomplete", &data) {
@@ -299,14 +309,23 @@ async fn autocomplete(data: web::Data<AppState<'_>>, req: HttpRequest, session: 
 async fn end_task(data: web::Data<AppState<'_>>, req: HttpRequest) -> impl Responder {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
 
-    if let Some(user) = get_user_from_request(&req, conn) {
+    if let Some(_user) = get_user_from_request(&req, conn) {
         log::debug!("End Task - Request: {:?}", req);
-        // TODO: Implement task ending logic
-        HttpResponse::Ok().json(json!({
-            "status": "success",
-            "message": "Task ended",
-            "user_id": user.id
-        }))
+
+        // Implement task ending logic
+        // Assuming task_id is passed as a query parameter
+        let task_id: i32 = req.match_info().query("task_id").parse().unwrap();
+        match crud::update_task_without_title(conn, task_id, None, None, TaskStatus::Completed) {
+            Ok(task) => HttpResponse::Ok().json(json!({
+                "status": "success",
+                "message": "Task ended",
+                "task": task
+            })),
+            Err(err) => HttpResponse::InternalServerError().json(json!({
+                "status": "error",
+                "message": format!("Failed to end task: {}", err)
+            })),
+        }
     } else {
         HttpResponse::Unauthorized().finish()
     }

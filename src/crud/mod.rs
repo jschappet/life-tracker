@@ -1,4 +1,5 @@
 pub mod task;
+pub mod tags;
 pub mod daily_todos;
 pub mod project;
 pub mod user;
@@ -18,6 +19,7 @@ pub use reward::{create_reward, get_rewards, get_reward, update_reward, delete_r
 pub use daily_todos::{create_daily_todo, get_daily_todos_by_user, get_daily_todos, update_daily_todo, delete_daily_todo};
 
 pub use goals::{create_goal, get_goal_by_id, get_goals_by_user, update_goal, delete_goal};
+pub use tags::{create_tag, delete_tag, get_tag, get_tags};
 
 pub use project::{
     create_project,  
