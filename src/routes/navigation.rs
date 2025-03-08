@@ -261,6 +261,8 @@ async fn footer(data: web::Data<AppState<'_>>) -> impl Responder {
 }
 
 
+
+
 #[get("/autocomplete")]
 async fn autocomplete(data: web::Data<AppState<'_>>, req: HttpRequest, session: actix_session::Session) -> impl Responder {
     //log::debug!("Autocomplete - Query String: {:?}", req);

@@ -1,7 +1,7 @@
 extern crate serde;
 
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
-use crate::crud::tags::{add_tags_by_task, get_tags_by_task};
+use crate::crud::tags::add_tags_by_task;
 use crate::models::{NewTask, Task};
 use crate::crud::{create_task, delete_task, get_tasks, update_task, update_task_without_title};
 use crate::state::AppState;

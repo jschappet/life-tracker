@@ -52,7 +52,9 @@ diesel::table! {
 diesel::table! {
     tags (id) {
         id -> Integer,
+        user_id -> Integer,
         name -> Text,
+        icon_url -> Nullable<Text>,
     }
 }
 

@@ -208,7 +208,7 @@ function addNewTag() {
     .then(response => response.json())
     .then(tag => {
       const tagElement = document.createElement('span');
-      tagElement.className = 'tag bg-gray-500';
+      tagElement.className = 'tag badge-md badge badge-outline badge-neutral';
       tagElement.dataset.id = tag.id;
       tagElement.innerText = tag.name;
       tagElement.onclick = () => toggleTag(tag.id);
