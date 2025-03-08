@@ -6,7 +6,7 @@ mod claims;
 use actix_web::dev::ServiceRequest;
 use actix_web::{web, App, Error, HttpServer, HttpResponse, middleware as mw};
 
-use actix_web_httpauth::extractors::basic::BasicAuth;
+//use actix_web_httpauth::extractors::basic::BasicAuth;
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 
 // Used for integration with `actix-web-httpauth`
@@ -51,18 +51,18 @@ async fn validator(
     }
 }
 
-async fn basic_validator(
-    req: ServiceRequest,
-    credentials: BasicAuth,
-) -> Result<ServiceRequest, (Error, ServiceRequest)> {
-    // Basic auth example - validate username/password
-    if credentials.user_id() == "admin" && credentials.password().unwrap_or_default() == "secret" {
-        req.attach(vec!["ADMIN".to_string()]);
-        Ok(req)
-    } else {
-        Err((Error::from(actix_web::error::ErrorUnauthorized("Invalid credentials")), req))
-    }
-}
+// async fn basic_validator(
+//     req: ServiceRequest,
+//     credentials: BasicAuth,
+// ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+//     // Basic auth example - validate username/password
+//     if credentials.user_id() == "admin" && credentials.password().unwrap_or_default() == "secret" {
+//         req.attach(vec!["ADMIN".to_string()]);
+//         Ok(req)
+//     } else {
+//         Err((Error::from(actix_web::error::ErrorUnauthorized("Invalid credentials")), req))
+//     }
+// }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

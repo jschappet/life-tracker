@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TaskStatus {
     Pending,
     InProgress,
@@ -23,6 +23,15 @@ impl TaskStatus {
             TaskStatus::InProgress => "in_progress",
             TaskStatus::Completed => "completed"
         }
+    }
+
+    // Convert enum back to database string
+    pub fn as_string(&self) -> Option<String> {
+            match self {
+                TaskStatus::Pending => Some(String::from("pending")),
+                TaskStatus::InProgress => Some(String::from("in_progress")),
+                TaskStatus::Completed => Some(String::from("completed"))
+            }
     }
 
     // Optional: Add business logic for status transitions

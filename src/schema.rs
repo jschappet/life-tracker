@@ -50,6 +50,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    tags (id) {
+        id -> Integer,
+        name -> Text,
+    }
+}
+
+diesel::table! {
+    task_tags (task_id, tag_id) {
+        task_id -> Integer,
+        tag_id -> Integer,
+    }
+}
+
+diesel::table! {
     tasks (id) {
         id -> Integer,
         user_id -> Integer,
@@ -81,6 +95,8 @@ diesel::joinable!(project_goals -> goals (goal_id));
 diesel::joinable!(project_goals -> projects (project_id));
 diesel::joinable!(projects -> users (user_id));
 diesel::joinable!(rewards -> users (user_id));
+diesel::joinable!(task_tags -> tags (tag_id));
+diesel::joinable!(task_tags -> tasks (task_id));
 diesel::joinable!(tasks -> projects (project_id));
 diesel::joinable!(tasks -> users (user_id));
 
@@ -90,6 +106,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     project_goals,
     projects,
     rewards,
+    tags,
+    task_tags,
     tasks,
     users,
 );

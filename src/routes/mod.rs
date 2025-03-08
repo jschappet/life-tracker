@@ -6,6 +6,8 @@ pub mod projects_api;
 pub mod rewards_api;
 pub mod users_api;
 
+pub mod tags_api;
+
 use actix_web::web;
 
 pub fn config_api(cfg: &mut web::ServiceConfig) {
@@ -14,6 +16,8 @@ pub fn config_api(cfg: &mut web::ServiceConfig) {
         .configure(projects_api::config)
         .configure(users_api::config)
         .configure(rewards_api::config)
+        .configure(tags_api::config)
+
         .configure(daily_todo_api::config);
 }
 

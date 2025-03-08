@@ -3,9 +3,11 @@ use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
 use crate::models::{ NewTask, Task};
 use crate::schema::tasks::dsl::*;
+use crate::types::TaskStatus;
 use log::info;
 
 use chrono::{NaiveDate, NaiveDateTime, Utc};
+use std::collections::HashSet;
 
 
 
@@ -16,15 +18,15 @@ pub fn create_task(
     task_description: Option<&str>, 
     task_due_date: Option<NaiveDate>,
     task_user_id: i32,
-    new_status: Option<String>,
+    new_status: Option<TaskStatus>,
 ) -> QueryResult<Task> {
     info!("Creating Task ...");
 
     use crate::schema::tasks::dsl::*;
     
 
-    let start_time_val = match new_status.as_deref() {
-        Some("in_progress") => Some(Utc::now().naive_utc()),
+    let start_time_val = match new_status.clone().unwrap() {
+       TaskStatus::InProgress => Some(Utc::now().naive_utc()),
         _ => None,
     };
 
@@ -33,7 +35,7 @@ pub fn create_task(
         user_id: task_user_id,
         description: task_description.map(|s| s.to_string()),
         due_date: task_due_date,
-        status: new_status, 
+        status: new_status.unwrap().as_string(), 
         project_id: None,
         start_time: start_time_val,
         end_time: None,
@@ -65,19 +67,19 @@ pub fn get_task(conn: &mut SqliteConnection, other_task_id: i32) -> QueryResult<
     tasks.filter(id.eq(other_task_id)).first::<Task>(conn)
 }
 
-pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32, new_description: Option<&str>, new_due_date: Option<NaiveDate>, new_status: Option<&str>) -> QueryResult<Task> {
+pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32, new_description: Option<&str>, new_due_date: Option<NaiveDate>, new_status: TaskStatus) -> QueryResult<Task> {
     // Get the current date and time
     let date_now: NaiveDateTime = Utc::now().naive_utc();
 
     match new_status {
-        Some("completed") => {
+        TaskStatus::Completed => {
             
             diesel::update(tasks.find(other_task_id))
             .set(
                 (
                     description.eq(new_description),
                     due_date.eq(new_due_date),
-                    status.eq(new_status),
+                    status.eq(new_status.as_string()),
                     end_time.eq(date_now),
             )
             )
@@ -88,14 +90,14 @@ pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32
             })?;
         },
 
-        Some("in_progress") => {
+        TaskStatus::InProgress => {
             log::debug!("Task Update: {} {:?}",    other_task_id, new_status);
             diesel::update(tasks.find(other_task_id))
             .set(
                 (
                     description.eq(new_description),
                     due_date.eq(new_due_date),
-                    status.eq(new_status),
+                    status.eq(new_status.as_string()),
                     start_time.eq(date_now),
             )
             )
@@ -112,7 +114,7 @@ pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32
                 (
                     description.eq(new_description),
                     due_date.eq(new_due_date),
-                    status.eq(new_status),
+                    status.eq(new_status.as_string()),
             )
             )
             .execute(conn)
@@ -130,14 +132,14 @@ pub fn update_task_without_title(conn: &mut SqliteConnection, other_task_id: i32
     })
 }
 
-pub fn update_task(conn: &mut SqliteConnection, other_task_id: i32, new_title: &str, new_description: Option<&str>, new_due_date: Option<NaiveDate>, new_status: Option<&str>) -> QueryResult<Task> {
+pub fn update_task(conn: &mut SqliteConnection, other_task_id: i32, new_title: &str, new_description: Option<&str>, new_due_date: Option<NaiveDate>, new_status: TaskStatus) -> QueryResult<Task> {
     diesel::update(tasks.find(other_task_id))
         .set(
             (
                 title.eq(new_title), 
                 description.eq(new_description),
                 due_date.eq(new_due_date),
-                status.eq(new_status),
+                status.eq(new_status.as_string()),
         )
         )
         .execute(conn)?;
@@ -155,11 +157,19 @@ pub fn search_tasks_by_title(
     usr_id: i32,
 ) -> QueryResult<Vec<Task>> {
     log::debug!("Searching for tasks with title containing: {}", query_string);
-    tasks
+    let task_list = tasks
         .filter(title.not_like(""))
         .filter(title.like(format!("%{}%", query_string)))
         .filter(user_id.eq(usr_id))
         .order_by(title.asc())
-        .load::<Task>(conn)
+        .load::<Task>(conn)?;
+
+    let mut unique_titles = HashSet::new();
+    let unique_tasks: Vec<Task> = task_list
+        .into_iter()
+        .filter(|task| unique_titles.insert(task.title.clone()))
+        .collect();
+
+    Ok(unique_tasks)
 }
 // SELECT * FROM tasks WHERE title LIKE '%asdf%' AND user_id = 4;

@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Life Tracker - Time Tracker</title>
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
   <link href="/tracker/s/css/output.css" rel="stylesheet">
@@ -19,12 +20,18 @@
         placeholder="Type your task..." />
       <ul id="suggestions" class="mt-2 text-lg"></ul>
 
+      <div id="tags" hx-get="/tracker/api/page/tags" 
+        hx-trigger="load" hx-target="#tags" 
+        hx-swap="innerHTML" class="mt-2">
+       
+      </div>
+
       <button class="btn btn-primary w-full mt-2 text-lg" onclick="submitTask(event)">
         Submit
       </button>
     </fieldset>
-    <div id="results" class="card w-full bg-base-100 shadow-lg">
-      <ul class="list bg-base-100 rounded-box shadow-md">
+    <div class="card w-full bg-base-100 shadow-lg">
+      <ul id="results" class="list bg-base-100 rounded-box shadow-md">
         <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">Task List</li>
 
         {{#each tasks}}
