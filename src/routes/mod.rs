@@ -7,6 +7,7 @@ pub mod rewards_api;
 pub mod users_api;
 
 pub mod tags_api;
+pub mod gpt_api;
 
 use actix_web::web;
 
@@ -17,6 +18,7 @@ pub fn config_api(cfg: &mut web::ServiceConfig) {
         .configure(users_api::config)
         .configure(rewards_api::config)
         .configure(tags_api::config)
+        .configure(gpt_api::config)
 
         .configure(daily_todo_api::config);
 }

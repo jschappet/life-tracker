@@ -73,7 +73,7 @@ if (document.getElementById('task-form')) {
     const data = Object.fromEntries(formData.entries());
     data.user_id = parseInt(data.user_id, 10); // Convert user_id to an integer
     const token = localStorage.getItem('auth_token');
-    console.log(token);
+    //console.log(token);
     try {
       const response = await fetch('/api/tasks', {
         method: 'POST',
