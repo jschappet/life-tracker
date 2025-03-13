@@ -1,4 +1,13 @@
-use actix_web::HttpRequest;
+use actix_web::dev::ServiceRequest;
+
+use actix_web::{HttpRequest, Error};
+
+
+use actix_web_httpauth::extractors::bearer::BearerAuth;
+
+// Used for integration with `actix-web-httpauth`
+use actix_web_grants::authorities::AttachAuthorities;
+
 use crate::claims;
 use crate::models::User;
 use diesel::r2d2::PooledConnection;
@@ -34,3 +43,20 @@ pub fn get_user_from_request(
 }
 
 
+pub async fn validator(
+    req: ServiceRequest,
+    credentials: BearerAuth,
+) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    // We just get permissions from JWT
+    log::debug!("validator {:?}", req);
+    let result = claims::decode_jwt(credentials.token());
+    match result {
+        Ok(claims) => {
+            log::debug!("validator: {:?}", claims);
+            req.attach(claims.permissions);
+            Ok(req)
+        }
+        // required by `actix-web-httpauth` validator signature
+        Err(e) => Err((e, req)),
+    }
+}

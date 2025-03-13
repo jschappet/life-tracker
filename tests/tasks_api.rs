@@ -55,6 +55,7 @@ mod tests {
             db_pool: pool,
             omdb_api_key: "foo".to_string(),
             hb: handlebars,
+            gpt_api_key: "demo".to_string(),
         }
     }
 

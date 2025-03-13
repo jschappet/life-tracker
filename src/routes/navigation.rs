@@ -114,6 +114,21 @@ async fn login_form(data: web::Data<AppState<'_>>) -> HttpResponse {
     }
 }
 
+
+// Convert to template
+#[get("/gpt")]
+async fn gpt(data: web::Data<AppState<'_>>) -> HttpResponse {
+    let hb = &data.hb;
+    let data = json!({});
+    match hb.render("gpt", &data) {
+        Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
+        Err(err) => {
+            log::error!("{}", err.reason());
+            HttpResponse::InternalServerError().body("Failed to render template")
+        },
+    }
+}
+
 #[post("/auth/login")]
 async fn handle_login(data: web::Data<AppState<'_>>, form: web::Form<LoginForm>, session: actix_session::Session) -> HttpResponse {
     let conn = &mut data.db_pool.get().expect("Database connection failed");
@@ -345,6 +360,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .service(end_task)
        .service(autocomplete)
        .service(footer)
+       .service(gpt)
        //.service(submit_task)
        //.service(tt_update_task)
        ;  // Ensure the tt_update_task route is added

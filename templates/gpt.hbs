@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans"></body>
+    <div class="max-w-sm mx-auto mt-10 p-4 bg-white shadow-md rounded-lg">
+        <div id="messages" class="h-48 overflow-y-scroll border border-gray-300 p-2 mb-4 rounded"></div>
+        <div id="input-container" class="flex">
+            <input type="text" id="user-input" placeholder="Type a message..." class="flex-1 p-2 border border-gray-300 rounded-l">
+            <button onclick="sendMessage()" class="p-2 bg-blue-500 text-white rounded-r">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('user-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const token = localStorage.getItem('auth_token');
+
+            const userInput = document.getElementById('user-input').value;
+            if (!userInput) return;
+
+            const messageContainer = document.getElementById('messages');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message mb-2';
+            userMessage.textContent = `You: ${userInput}`;
+            messageContainer.appendChild(userMessage);
+
+            const response = await fetch('/tracker/api/send_request', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ messages: [ {"role": "user", "content": userInput } ] })
+            });
+
+            const data = await response.json();
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message mb-2';
+            console.log("Data: ", data)
+            botMessage.textContent = `${data.role}: ${data.content}`;
+            messageContainer.appendChild(botMessage);
+
+            document.getElementById('user-input').value = '';
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
