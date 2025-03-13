@@ -23,4 +23,5 @@ node_modules/
 /token
 /life-tracker.db
 /life-tracker
-/application.toml
+/config/application.toml
+
