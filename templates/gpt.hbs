@@ -13,6 +13,10 @@
             <input type="text" id="user-input" placeholder="Type a message..." class="flex-1 p-2 border border-gray-300 rounded-l">
             <button onclick="sendMessage()" class="p-2 bg-blue-500 text-white rounded-r">Send</button>
         </div>
+        <div id="task-container" class="flex mt-4">
+            <input type="text" id="task-id" placeholder="Enter task ID..." class="flex-1 p-2 border border-gray-300 rounded-l">
+            <button onclick="getSubTasks()" class="p-2 bg-green-500 text-white rounded-r">Get Sub Tasks</button>
+        </div>
     </div>
 
     <script>
@@ -51,6 +55,30 @@
             messageContainer.appendChild(botMessage);
 
             document.getElementById('user-input').value = '';
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        async function getSubTasks() {
+            const token = localStorage.getItem('auth_token');
+
+            const taskId = document.getElementById('task-id').value;
+            if (!taskId) return;
+
+            const response = await fetch(`/tracker/api/create_sub_task/${taskId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            const messageContainer = document.getElementById('messages');
+            const subTasksMessage = document.createElement('div');
+            subTasksMessage.className = 'message mb-2';
+            subTasksMessage.textContent = `Sub Tasks: ${JSON.stringify(data)}`;
+            messageContainer.appendChild(subTasksMessage);
+
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
     </script>

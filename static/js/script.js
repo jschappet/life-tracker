@@ -263,6 +263,85 @@ async function handleLoginResponse(response) {
 }
 
 
+async function getSubTasks(taskId) {
+  const token = localStorage.getItem('auth_token');
+
+  if (!taskId) return;
+
+  const response = await fetch(`/tracker/api/create_sub_task/${taskId}`, {
+      method: 'GET',
+      headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+      }
+  });
+
+  const data = await response.json();
+  const subTaskList = document.getElementById('subTaskList');
+  subTaskList.innerHTML = ''; // Clear existing sub-tasks
+
+  data.forEach(subTask => {
+    const subTaskElement = document.createElement('li');
+    subTaskElement.className = 'mb-2';
+    subTaskElement.innerHTML = `
+    <div class="flex w-full">
+      <input type="text" class="input xs" value="${subTask.title}" data-id="${subTask.id}" data-parent-id="${taskId}" />
+      <input type="text" class="hidden" value="${subTask.description}" data-desc-id="${subTask.id}" data-parent-id="${taskId}" />
+
+      <button class="xs btn-outline btn btn-primary" onClick="saveSubTask(${subTask.id}, ${taskId})">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="green">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <button class="xs btn-outline btn btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="red">
+          <path fill-rule="evenodd" d="M10 8.586l-4.293-4.293a1 1 0 00-1.414 1.414L8.586 10l-4.293 4.293a1 1 0 001.414 1.414L10 11.414l4.293 4.293a1 1 0 001.414-1.414L11.414 10l4.293-4.293a1 1 0 00-1.414-1.414L10 8.586z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      </div>
+    `;
+    subTaskList.appendChild(subTaskElement);
+  });
+
+  // Show the modal
+  document.getElementById('subTaskModal').classList.remove('hidden');
+}
+
+function closeSubTaskModal() {
+  document.getElementById('subTaskModal').classList.add('hidden');
+}
+
+async function saveSubTask(subTaskId, parentTaskId) {
+  const token = localStorage.getItem('auth_token');
+  const subTaskInput = document.querySelector(`input[data-id="${subTaskId}"]`);
+
+  const subTaskDescription = document.querySelector(`input[data-desc-id="${subTaskId}"]`).value;
+  const subTaskTitle = subTaskInput.value;
+
+  try {
+    const response = await fetch('/tracker/api/submit-task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({  taskInput: subTaskTitle, 
+        description: subTaskDescription,
+        tags: [], parent_id: parentTaskId , "status": "pending" })
+    });
+ 
+    const result = await response.json();
+    if (result.status === 'success') {
+      alert('Sub-task updated successfully');
+      // Do not close the modal here
+    } else {
+      alert(`Error: ${result.message}`);
+    }
+  } catch (error) {
+    console.error('Error updating sub-task:', error);
+  }
+}
+
 document.body.addEventListener("htmx:configRequest", function (evt) {
   const authCookie = localStorage.getItem('auth_token');
   if (authCookie) {           // Set the authentication header for all future requests                

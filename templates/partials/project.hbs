@@ -1,0 +1,39 @@
+<!-- TODO: create an interface for disoplaying and editing project descriptions.
+The view setions should display project contents HTML 
+    from the Markdown text stored in the database.
+
+Please complete this partial template. No need to create a header or footer for the HTML page, it will be provided by the template
+
+ -->
+
+<div class="contain-content flex flex-col ">
+    <div class="project-description  w-full h-full">
+        <h2>Project Title: <b>{{{project.title}}}</b></h2>
+        <div class="view-section">
+            {{{project.description}}}
+        </div>
+        <div class="edit-section hidden w-full">
+            <input id="id" type="hidden" value="{{{project.id}}}" />
+            <input id="created_at" type="hidden" value="{{{project.created_at}}}" />
+            <h2><input id="taskInput" type="text" name="title" value="{{{project.title}}}"></h2>
+            <textarea id="projectDescriptionEditor" name="description">{{project.description}}</textarea>
+            <button id="saveProjectDescription" 
+                hx-put="/tracker/api/project/{{project.id}}"
+                hx-on="htmx:configRequest:convertFormToJson"
+                hx-vals='{"id": "{{project.id}}", 
+                    "title": document.getElementById("taskInput").value, 
+                    "description": document.getElementById("projectDescriptionEditor").value, 
+                    "created_at": "{{project.created_at}}"}'
+                hx-headers='{"Content-Type": "application/json"}'
+                hx-swap="outerHTML">Save</button>
+        </div>
+    </div>
+    <button onclick="toggleEdit()" class="btn btn-ghost sm">Edit</button>
+</div>
+
+<script>
+    function toggleEdit() {
+        document.querySelector('.view-section').classList.toggle('hidden');
+        document.querySelector('.edit-section').classList.toggle('hidden');
+    }
+</script>

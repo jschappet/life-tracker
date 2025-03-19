@@ -1,5 +1,6 @@
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
-use crate::crud::{create_project, get_projects, update_project, delete_project};
+use serde_json::json;
+use crate::crud::{create_project, delete_project, get_project, get_projects, update_project};
 use crate::state::AppState;
 use crate::models::{Project, NewProject};
 
@@ -77,10 +78,38 @@ pub async fn get_projects_page<'hb>(data: web::Data<AppState<'hb>>) -> impl Resp
     }
 }
 
+
+#[get("/page/project/{project_id}")]
+pub async fn get_project_page<'hb>(
+    data: web::Data<AppState<'hb>>, 
+    project_id: web::Path<i32>,
+) -> impl Responder {
+    let conn = &mut data.db_pool.get().expect("Database connection failed");
+    log::debug!("Gettting Project: {}", project_id.clone());
+    match get_project(conn, project_id.into_inner()) {
+        Ok(project) => {
+            let json_data = json!({"project": project});
+            
+            match data.hb.render("partials/project", &json_data) {
+                Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
+                Err(err) => {
+                    log::error!("{}", err.reason());
+                    HttpResponse::InternalServerError().body("Failed to render template")
+                },
+            }
+        }
+        Err(e) => {
+            log::debug!("failed to retrieve projects: {}", e);
+            HttpResponse::InternalServerError().body("Failed to retrieve projects")
+        },
+    }
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(create_project_api)
        .service(get_projects_api)
        .service(update_project_api)
        .service(delete_project_api)
-       .service(get_projects_page);
+       .service(get_projects_page)
+       .service(get_project_page);
 }

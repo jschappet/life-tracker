@@ -45,6 +45,10 @@ pub fn delete_project(conn: &mut SqliteConnection, project_id_val: i32) -> Query
     diesel::delete(projects.find(project_id_val)).execute(conn)
 }
 
+pub fn get_project(conn: &mut SqliteConnection, project_id_val: i32) -> QueryResult<Project> {
+    projects.find(project_id_val).first::<Project>(conn)
+}
+
 pub fn create_project_goal(conn: &mut SqliteConnection, project_id_val: i32, goal_id_val: i32) -> QueryResult<ProjectGoal> {
     let new_project_goal = ProjectGoal { project_id: project_id_val, goal_id: goal_id_val };
     

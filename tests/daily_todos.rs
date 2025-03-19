@@ -38,10 +38,11 @@ CREATE TABLE daily_todos (
         let handlebars = Arc::new(handlebars);
 
         AppState {
+            
             db_pool: pool,
             omdb_api_key: "foo".to_string(),
             hb: handlebars,
-            gpt_api_key: "demo".to_string(),
+            //gpt_api_key: "demo".to_string(),
         }
     }
 

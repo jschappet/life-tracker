@@ -19,6 +19,8 @@ pub fn create_task(
     task_due_date: Option<NaiveDate>,
     task_user_id: i32,
     new_status: Option<TaskStatus>,
+    parent_id: Option<i32>,
+
 ) -> QueryResult<Task> {
     info!("Creating Task ...");
 
@@ -39,6 +41,7 @@ pub fn create_task(
         project_id: None,
         start_time: start_time_val,
         end_time: None,
+        parent_task_id: parent_id
     };
 
     diesel::insert_into(tasks)

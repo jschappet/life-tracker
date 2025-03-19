@@ -276,6 +276,26 @@ async fn footer(data: web::Data<AppState<'_>>) -> impl Responder {
 }
 
 
+#[get("/projects")]
+async fn get_project_page(data: web::Data<AppState<'_>>, req: HttpRequest, session: actix_session::Session) -> impl Responder {
+    //log::debug!("Autocomplete - Query String: {:?}", req);
+    
+    let conn = &mut data.db_pool.get().expect("Database connection failed");
+   
+    if let Some(user) = get_user_from_session(&session, conn) {
+        let json_data = json!({"user": user});
+        match data.hb.render("project", &json_data) {
+            Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
+            Err(err) => {
+                log::error!("{}", err.reason());
+                HttpResponse::InternalServerError().body("Failed to render template")
+            },
+        }
+    } else {
+        log::debug!("Unauthorized access to autocomplete");
+        HttpResponse::Unauthorized().finish()
+    }
+}
 
 
 #[get("/autocomplete")]
@@ -361,7 +381,10 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .service(autocomplete)
        .service(footer)
        .service(gpt)
+       .service(get_project_page)
+
        //.service(submit_task)
+
        //.service(tt_update_task)
        ;  // Ensure the tt_update_task route is added
 }

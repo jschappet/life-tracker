@@ -26,7 +26,8 @@ pub use project::{
     update_project, 
     delete_project, 
     create_project_goal, 
-    get_project_goals, 
+    get_project_goals,
+    get_project, 
     delete_project_goal,
     get_projects
 };

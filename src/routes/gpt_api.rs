@@ -1,4 +1,4 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{ web, HttpResponse, Responder};
 use crate::state::AppState;
 use serde::Deserialize;
 use crate::gpt::{request_gpt, GptRequestParams, GptMessage};
@@ -10,6 +10,7 @@ use std::sync::Arc;
 pub struct RequestParams {
     pub messages: Vec<GptMessage>,
 }
+
 
 
 async fn send_request<'a>(data: web::Data<AppState<'a>>, params: web::Json<RequestParams>) -> impl Responder {

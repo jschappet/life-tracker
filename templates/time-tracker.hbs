@@ -35,14 +35,32 @@
               <div class="font-semibold">{{this.title}}</div>
               <div class="text-xs opacity-60">{{this.description}}</div>
             </div>
-
-            <button class="btn btn-square btn-ghost align-top" onclick="markTaskStopped(this, {{this.id}})">
+            <div >
+              <button class="btn btn-square btn-ghost align-top" onclick="getSubTasks({{this.id}})">Split</button>
+              <button class="btn btn-square btn-ghost align-top" onclick="markTaskStopped(this, {{this.id}})">
               <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24"
                 stroke-width=".6" stroke="currentColor" class="size-[1.5em]">
                 <path
                   d="m22.389,5.418l-3.808-3.808c-1.04-1.039-2.42-1.61-3.889-1.61h-5.385c-1.469,0-2.85.572-3.889,1.611l-3.808,3.808c-1.039,1.04-1.61,2.42-1.61,3.889v5.385c0,1.469.572,2.85,1.611,3.889l3.808,3.808c1.04,1.039,2.42,1.61,3.889,1.61h5.385c1.469,0,2.85-.572,3.889-1.611l3.808-3.808c1.039-1.04,1.61-2.42,1.61-3.889v-5.385c0-1.469-.572-2.85-1.611-3.889Zm-1.389,9.274c0,.667-.26,1.296-.732,1.768l-3.808,3.807c-.472.472-1.101.732-1.768.732h-5.385c-.667,0-1.296-.26-1.768-.732l-3.807-3.808c-.472-.472-.732-1.101-.732-1.768v-5.385c0-.667.26-1.296.732-1.768l3.808-3.807c.472-.472,1.101-.732,1.768-.732h5.385c.667,0,1.296.26,1.768.732l3.807,3.808c.472.472.732,1.101.732,1.768v5.385Zm-3.407-6.22c.567.604.538,1.553-.065,2.12l-4.145,3.896c-.699.7-1.629,1.052-2.565,1.052-.946,0-1.898-.36-2.622-1.084l-1.795-1.938c-.563-.608-.526-1.557.082-2.12.608-.563,1.557-.527,2.12.082l1.755,1.896c.23.229.668.229.938-.042l4.178-3.928c.604-.569,1.553-.539,2.12.065Z" />
               </svg>
             </button>
+            </div>
+            <ul id="subtasks-{{this.id}}" class="ml-4 mt-2 text-sm border-l-2 border-gray-300 pl-4">
+              {{#each this.subtasks}}
+              <li class="subtask-item" id="subtask-{{this.id}}">
+                <div class="flex justify-between">
+                  <div class="font-semibold">{{this.title}}</div>
+                  <button class="btn btn-square btn-ghost align-top" onclick="markTaskStopped(this, {{this.id}})">
+                    <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24"
+                      stroke-width=".6" stroke="currentColor" class="size-[1.5em]">
+                      <path
+                        d="m22.389,5.418l-3.808-3.808c-1.04-1.039-2.42-1.61-3.889-1.61h-5.385c-1.469,0-2.85.572-3.889,1.611l-3.808,3.808c-1.039,1.04-1.61,2.42-1.61,3.889v5.385c0,1.469.572,2.85,1.611,3.889l3.808,3.808c1.04,1.039,2.42,1.61,3.889,1.61h5.385c1.469,0,2.85-.572,3.889-1.611l3.808-3.808c1.039-1.04,1.61-2.42,1.61-3.889v-5.385c0-1.469-.572-2.85-1.611-3.889Zm-1.389,9.274c0,.667-.26,1.296-.732,1.768l-3.808,3.807c-.472.472-1.101.732-1.768.732h-5.385c-.667,0-1.296-.26-1.768-.732l-3.807-3.808c-.472-.472-.732-1.101-.732-1.768v-5.385c0-.667.26-1.296.732-1.768l3.808-3.807c.472-.472,1.101-.732,1.768-.732h5.385c.667,0,1.296.26,1.768.732l3.807,3.808c.472.472.732,1.101.732,1.768v5.385Zm-3.407-6.22c.567.604.538,1.553-.065,2.12l-4.145,3.896c-.699.7-1.629,1.052-2.565,1.052-.946,0-1.898-.36-2.622-1.084l-1.795-1.938c-.563-.608-.526-1.557.082-2.12.608-.563,1.557-.527,2.12.082l1.755,1.896c.23.229.668.229.938-.042l4.178-3.928c.604-.569,1.553-.539,2.12.065Z" />
+                    </svg>
+                  </button>
+                </div>
+              </li>
+              {{/each}}
+            </ul>
           </li>
           {{/each }}
         </ul>
@@ -51,6 +69,15 @@
     </div>
         {{> partials/footer}}
 </div>  
+
+  <!-- Modal for editing sub-tasks -->
+  <div id="subTaskModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white p-4 rounded-lg shadow-lg w-1/2">
+      <h2 class="text-xl mb-4">Edit Sub-Tasks</h2>
+      <ul id="subTaskList" class="mb-4"></ul>
+      <button class="btn btn-secondary" onclick="closeSubTaskModal()">Close</button>
+    </div>
+  </div>
   
   <script src="/tracker/s/js/script.js"></script>
 </body>

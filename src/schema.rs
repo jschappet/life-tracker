@@ -69,6 +69,7 @@ diesel::table! {
     tasks (id) {
         id -> Integer,
         user_id -> Integer,
+        parent_task_id -> Nullable<Integer>,
         project_id -> Nullable<Integer>,
         title -> Text,
         description -> Nullable<Text>,

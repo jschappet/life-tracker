@@ -2,8 +2,9 @@ extern crate serde;
 
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
 use crate::crud::tags::add_tags_by_task;
+use crate::gpt::get_sub_tasks;
 use crate::models::{NewTask, Task};
-use crate::crud::{create_task, delete_task, get_tasks, update_task, update_task_without_title};
+use crate::crud::{create_task, delete_task, get_task, get_tasks, update_task, update_task_without_title};
 use crate::state::AppState;
 use crate::types::TaskStatus;
 use serde_json::json;
@@ -17,6 +18,7 @@ struct SubmitTaskData {
     title: String,
     status: String,
     tags: Vec<i32>,
+    parent_id: Option<i32>, 
     // Optional fields can be added later if needed
 }
 
@@ -79,10 +81,36 @@ pub async fn create_task_api<'hb>(
         new_task.due_date,
         new_task.user_id,
         ts,
+        new_task.parent_task_id
     ) {
         Ok(task) => HttpResponse::Ok().json(task),
         Err(_) => HttpResponse::InternalServerError().body("Failed to create task"),
     }
+}
+
+
+#[get("/create_sub_task/{task_id}")]
+async fn create_sub_tasks(
+    data: web::Data<AppState<'_>>, 
+    //req: HttpRequest,
+    task_id: web::Path<i32>,
+    //task_data: web::Json<SubmitTaskData>
+) -> impl Responder {
+    let settings = data.settings.gpt.clone(); 
+    let conn = &mut data.db_pool.get().expect("Database connection failed");
+    match  get_task(conn, task_id.into_inner()) {
+        Ok(task) => {
+            match get_sub_tasks(task, settings).await {
+                Ok(task_list) => HttpResponse::Ok().json(task_list),
+                Err(_) => HttpResponse::InternalServerError().body("Failed to sub tasks"),
+            }
+        }, 
+        Err(_) =>
+            HttpResponse::InternalServerError().body("Task not found"),
+    }
+    
+    
+
 }
 
 #[post("/submit-task")]
@@ -101,7 +129,8 @@ async fn submit_task(
         // TODO: fix compile error
         let tags = task_data.clone().tags;
        
-        match create_task(conn, &task_data.title, Some(""), Some(task_due_date), user.id, ts) {
+        match create_task(conn, &task_data.title, Some(""),
+         Some(task_due_date), user.id, ts, task_data.parent_id) {
             Ok(task) => {
                 log::debug!("Adding Tags...");
                 match add_tags_by_task(conn, task.id, tags) {
@@ -199,5 +228,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .service(get_tasks_page)
        .service(delete_task_api)
        .service(submit_task)
-       .service(tt_update_task);  // Ensure the tt_update_task route is added
+       .service(tt_update_task)
+       .service(create_sub_tasks);  // Ensure the tt_update_task route is added
 }

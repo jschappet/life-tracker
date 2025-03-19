@@ -42,6 +42,7 @@ CREATE TABLE project_goals (
 CREATE TABLE tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     user_id INTEGER NOT NULL DEFAULT 0,
+    parent_task_id INTEGER, 
     project_id INTEGER,
     title TEXT NOT NULL,
     description TEXT,
@@ -74,4 +75,23 @@ CREATE TABLE rewards (
     points INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+-- Create tags table
+CREATE TABLE tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT  NOT NULL,
+    user_id INTEGER NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    icon_url VARCHAR(255),
+    UNIQUE(user_id, name) 
+);
+
+-- Create task_tags table
+CREATE TABLE task_tags (
+    task_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY (task_id) REFERENCES tasks(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id),
+    PRIMARY KEY (task_id, tag_id)
 );
