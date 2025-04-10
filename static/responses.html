@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Response Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f4f4f4;
+    }
+    .question {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 1.5em;
+    }
+    .response {
+      margin-left: 1em;
+      margin-bottom: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Collected Responses</h1>
+  <div id="content"></div>
+
+  <script>
+    async function loadResponses() {
+      const response = await fetch('/tracker/app/read_responses');
+      const data = await response.json();
+
+      const questions = {};
+
+      data.forEach(entry => {
+        Object.entries(entry).forEach(([key, value]) => {
+          if (!questions[key]) questions[key] = [];
+          questions[key].push(value);
+        });
+      });
+
+      const contentDiv = document.getElementById('content');
+      Object.entries(questions).forEach(([key, answers], index) => {
+        const question = document.createElement('div');
+        question.className = 'question';
+        question.textContent = answers[0]; // the first instance is the question
+
+        contentDiv.appendChild(question);
+
+        for (let i = 1; i < answers.length; i++) {
+          const response = document.createElement('div');
+          response.className = 'response';
+          response.textContent = `– ${answers[i]}`;
+          contentDiv.appendChild(response);
+        }
+      });
+    }
+
+    loadResponses();
+  </script>
+</body>
+</html>

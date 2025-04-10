@@ -1,8 +1,8 @@
 #!/bin/zsh 
 
-docker build -t life-tracker .  
+docker buildx build  --platform linux/amd64 -t life-tracker .  
 
-docker create --name life-tracker-container life-tracker 
+docker create --name life-tracker-container --platform linux/amd64 life-tracker 
 
 docker cp life-tracker-container:/usr/src/app/life-tracker ./life-tracker
 

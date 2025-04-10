@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Values & History Form</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-2xl mx-auto bg-white p-6 shadow-md rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Please answer these questions based on your personal values and understanding of history:</h2>
+        <form hx-post="/tracker/app/submit_questions" hx-swap="outerHTML" class="space-y-4">
+            <label class="block">
+                <span class="text-gray-700">Where did Christianity Go Wrong?</span>
+                <textarea name="q1" class="mt-1 block w-full p-2 border rounded"></textarea>
+            </label>
+            
+            <label class="block">
+                <span class="text-gray-700">Was Expansion "Bad" from the Start?</span>
+                <textarea name="q2" class="mt-1 block w-full p-2 border rounded"></textarea>
+            </label>
+            
+            <label class="block">
+                <span class="text-gray-700">Why did the Love movement of the 60s fade away?</span>
+                <textarea name="q3" class="mt-1 block w-full p-2 border rounded"></textarea>
+            </label>
+            
+            <label class="block">
+                <span class="text-gray-700">How do you break loose from Systems of Control?</span>
+                <textarea name="q4" class="mt-1 block w-full p-2 border rounded"></textarea>
+            </label>
+            
+            <label class="block">
+                <span class="text-gray-700">How do we break loose from Systems of Control?</span>
+                <textarea name="q5" class="mt-1 block w-full p-2 border rounded"></textarea>
+            </label>
+            
+            <label class="block">
+                <span class="text-gray-700">What needs to be different this time as we Change?</span>
+                <textarea name="q6" class="mt-1 block w-full p-2 border rounded"></textarea>
+            </label>
+            
+            <label class="block">
+                <span class="text-gray-700">When does a support system become a control System?</span>
+                <textarea name="q7" class="mt-1 block w-full p-2 border rounded"></textarea>
+            </label>
+            
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

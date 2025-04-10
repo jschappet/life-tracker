@@ -9,6 +9,42 @@ use crate::state::AppState;
 use serde_json::json;
 use crate::auth::get_user_from_request;
 
+use std::fs::OpenOptions;
+use std::io::{Read, Write};
+
+
+#[derive(Debug, Deserialize, Serialize)]
+struct FormData {
+    q1: String,
+    q2: String,
+    q3: String,
+    q4: String,
+    q5: String,
+    q6: String,
+    q7: String,
+}
+
+#[post("/submit_questions")]
+async fn submit_questions(form: web::Form<FormData>) -> impl Responder {
+    let json_data = serde_json::to_string_pretty(&form.into_inner()).unwrap();
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("responses.log")
+        .expect("Failed to open file");
+
+    if let Err(e) = writeln!(file, "{}", json_data) {
+        eprintln!("Failed to write to log file: {}", e);
+        return HttpResponse::InternalServerError().body("Error saving response");
+    }
+    if let Err(e) = writeln!(file, "," ) {
+        eprintln!("Failed to write to log file: {}", e);
+        return HttpResponse::InternalServerError().body("Error saving response");
+    }
+
+    HttpResponse::Ok().body("Thank you for your submission!")
+}
 
 #[get("/hello")]
 pub async fn hello() -> impl Responder {
@@ -106,6 +142,23 @@ async fn login_form(data: web::Data<AppState<'_>>) -> HttpResponse {
     let hb = &data.hb;
     let data = json!({});
     match hb.render("login", &data) {
+        Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
+        Err(err) => {
+            log::error!("{}", err.reason());
+            HttpResponse::InternalServerError().body("Failed to render template")
+        },
+    }
+}
+
+
+
+
+// Convert to template
+#[get("/questions")]
+async fn questions_form(data: web::Data<AppState<'_>>) -> HttpResponse {
+    let hb = &data.hb;
+    let data = json!({});
+    match hb.render("questions", &data) {
         Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
         Err(err) => {
             log::error!("{}", err.reason());
@@ -366,6 +419,28 @@ async fn end_task(data: web::Data<AppState<'_>>, req: HttpRequest) -> impl Respo
     }
 }
 
+#[get("/read_responses")]
+async fn read_responses() -> impl Responder {
+    let mut file = match OpenOptions::new().read(true).open("responses.log") {
+        Ok(file) => file,
+        Err(e) => {
+            eprintln!("Failed to open file: {}", e);
+            return HttpResponse::InternalServerError().body("Error reading responses");
+        }
+    };
+
+    let mut contents = String::new();
+    if let Err(e) = file.read_to_string(&mut contents) {
+        eprintln!("Failed to read file: {}", e);
+        return HttpResponse::InternalServerError().body("Error reading responses");
+    }
+    // Trim off the last comma and add closing bracket
+    log::debug!("Contents: {:?}", contents);
+    let contents = contents.trim_end_matches('\n').to_string() ;
+    let contents = contents.trim_end_matches(',').to_string();
+    let contents = format!("[{}]", contents);
+    HttpResponse::Ok().body(contents)
+}
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(hello)
@@ -382,7 +457,9 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .service(footer)
        .service(gpt)
        .service(get_project_page)
-
+       .service(questions_form)
+       .service(submit_questions)
+       .service(read_responses)
        //.service(submit_task)
 
        //.service(tt_update_task)
